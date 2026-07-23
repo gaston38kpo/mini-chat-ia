@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./App.css";
 import ModelList from "./component/ModelList";
 import { useModelStore } from "./store/modelStore";
+import Chat from "./component/Chat";
 
 function App() {
     const { selectedModel } = useModelStore();
@@ -15,6 +16,8 @@ function App() {
             <div>
               Modelo Seleccionado: {selectedModel.display_name}
             </div>
+
+            {selectedModel.instance_id && <Chat />}
         </>
     );
 }

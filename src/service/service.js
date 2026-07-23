@@ -44,9 +44,32 @@ const unloadModel = async (instanceId) => {
     });
 }
 
+const sendMessage = async (instanceId, model, input) => {
+    console.log(`sendMessage called with instanceId: ${instanceId}, model: ${model}, input: ${input}`);
+    const jsBody = { input, model };
+
+    if (instanceId) {
+        jsBody.previous_response_id = instanceId;
+    }
+
+    return await fetch(`${BASE_URL}/chat`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(jsBody)
+    }).then(response => {
+        if (!response.ok) {
+            console.error(`sendMessage error status: ${response.status}`);
+        }
+        return response.json();
+    }).catch(error => {
+        console.error(`sendMessage error: ${error}`);
+    });
+}
+
 export {
     getModelsList,
     loadModel,
-    unloadModel
+    unloadModel,
+    sendMessage
 };
     
