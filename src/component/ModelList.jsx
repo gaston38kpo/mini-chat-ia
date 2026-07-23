@@ -7,7 +7,11 @@ const ModelList = () => {
     const [models, setModels] = useState([]);
 
     const normalizeModels = (response) => {
-        return Array.isArray(response) ? response : (response?.models ?? []);
+        const seen = new Map();
+        for (const model of response.models) {
+            seen.set(model.key, model); // la segunda escritura sobreescribe la primera
+    }
+        return Array.from(seen.values());
     };
 
     const getLoadedInstanceIds = (models) => {
@@ -22,7 +26,9 @@ const ModelList = () => {
 
     const refreshModels = async () => {
         const response = await getModelsList();
+        console.log({ response });
         const modelsList = normalizeModels(response);
+        console.log({ modelsList });
         setModels(modelsList);
         return modelsList;
     };

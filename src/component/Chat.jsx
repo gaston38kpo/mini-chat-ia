@@ -10,7 +10,7 @@ const Chat = () => {
         const res = await sendMessage(selectedModel.last_response_id, selectedModel.key, message);
 
         console.log({ res });
-        setMessages(res);
+        setMessages(res.output);
         setLastResponseId(res.response_id);
     };
 
@@ -21,6 +21,7 @@ const Chat = () => {
             const message = e.target.elements.message.value;
             onSubmitMessage(message);
         }}>
+            <span> {messages && messages[1]?.content} </span>
             <input type="text" name="message" />
             <button type="submit">Enviar</button>
         </form>
