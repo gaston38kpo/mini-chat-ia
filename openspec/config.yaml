@@ -1,0 +1,67 @@
+schema: spec-driven
+
+context: |
+  Tech stack: React 19 + Vite 8 + JavaScript (ES modules) + Zustand 5
+  Architecture: Single-page React app with component/service/store layers
+  Testing: No test runner installed (strict TDD disabled)
+  Style: Oxlint for React/Oxc rules; no formatter or type checker configured
+
+strict_tdd: false
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    guidance:
+      - Follow existing code patterns in src/component, src/service, src/store
+    tdd: false
+    test_command: ""
+  verify:
+    test_command: ""
+    build_command: "npm run build"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
+
+testing:
+  strict_tdd: false
+  detected: 2026-07-01
+  runner:
+    available: false
+    name: none
+    command: ""
+  layers:
+    unit:
+      available: false
+      tool: ""
+    integration:
+      available: false
+      tool: ""
+    e2e:
+      available: false
+      tool: ""
+  coverage:
+    available: false
+    command: ""
+  quality:
+    linter:
+      available: true
+      name: oxlint
+      command: npm run lint
+    type_checker:
+      available: false
+      name: none
+      command: ""
+    formatter:
+      available: false
+      name: none
+      command: ""
