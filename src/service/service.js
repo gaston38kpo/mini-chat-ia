@@ -45,7 +45,6 @@ const unloadModel = async (instanceId) => {
 }
 
 const sendMessage = async (instanceId, model, input) => {
-    console.log(`sendMessage called with instanceId: ${instanceId}, model: ${model}, input: ${input}`);
     const jsBody = { input, model };
 
     if (instanceId) {

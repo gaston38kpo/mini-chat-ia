@@ -27,9 +27,9 @@ const ModelList = () => {
 
     const refreshModels = async () => {
         const response = await getModelsList();
-        console.log({ response });
+        
         const modelsList = normalizeModels(response);
-        console.log({ modelsList });
+
         setModels(modelsList);
         return modelsList;
     };
@@ -37,7 +37,6 @@ const ModelList = () => {
     const unloadAllLoadedInstances = async () => {
         const modelsList = await refreshModels();
         const loadedInstanceIds = getLoadedInstanceIds(modelsList);
-        console.log(`Loaded instance IDs: ${loadedInstanceIds.join(", ")}`);
 
         if (!loadedInstanceIds.length) return;
 
@@ -53,12 +52,10 @@ const ModelList = () => {
         await unloadAllLoadedInstances();
 
         if (selectedModel?.instance_id) {
-            console.log(`Unloading model with instance_id: ${selectedModel.instance_id}`);
             unloadModel(selectedModel.instance_id);
         }
 
         const { instance_id } = await loadModel(key);
-        console.log({ key, display_name, instance_id });
         toast(`Modelo cargado: ${display_name}`, { type: 'success' });
         setSelectedModel({ display_name, instance_id, key });
     };
