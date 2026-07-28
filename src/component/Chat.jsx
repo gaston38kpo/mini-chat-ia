@@ -5,30 +5,49 @@ import { sendMessage } from "../service/service";
 const Chat = () => {
     const { selectedModel, setLastResponseId } = useModelStore();
     const [messages, setMessages] = useState([]);
-    const [messageInput, setMessageInput] = useState("");
+    const [currentMessage, setCurrentMessage] = useState("");
 
     const onSendMessage = async (event) => {
         event.preventDefault();
 
-        if (!messageInput.trim()) return;
+        if (!currentMessage.trim()) return;
 
-        setMessageInput("");
+        setCurrentMessage("");
+        setMessages((prev) => [
+            ...prev,
+            { role: "user", content: currentMessage }
+        ]);
 
-        const res = await sendMessage(selectedModel.last_response_id, selectedModel.key, messageInput);
+        const res = await sendMessage(selectedModel.last_response_id, selectedModel.key, currentMessage);
+        console.log(res)
 
-        setMessages(res.output);
+        const [thinking, assistantMessage] = res?.output ?? [null, null];
+
+        if (assistantMessage) {
+            setMessages((prev) => [
+                ...prev,
+                assistantMessage
+            ]);
+        }
+
         setLastResponseId(res.response_id);
     };
 
     const onChangeInputText = (e) => {
-        setMessageInput(e.target.value);
+        setCurrentMessage(e.target.value);
     };
 
     return <div>
-        <h1>Mensajes</h1>1
+        <h1>Mensajes</h1>
         <form onSubmit={onSendMessage}>
-            <span> {messages && messages[1]?.content} </span>
-            <input type="text" name="message" value={messageInput} onChange={onChangeInputText} />
+            <div>
+                {messages.map((message, index) => (
+                    <p key={`${message.role ?? "message"}-${index}`}>
+                        <strong>{message.role ?? "message"}:</strong> {message.content}
+                    </p>
+                ))}
+            </div>
+            <input type="text" name="message" value={currentMessage} onChange={onChangeInputText} />
             <button type="submit">Enviar</button>
         </form>
     </div>;
