@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getModelsList, loadModel, unloadModel } from "../service/service";
 import { useModelStore } from "../store/modelStore";
+import { Toaster, toast } from 'sonner';
 
 const ModelList = () => {
     const { selectedModel, setSelectedModel } = useModelStore();
@@ -9,7 +10,7 @@ const ModelList = () => {
     const normalizeModels = (response) => {
         const seen = new Map();
         for (const model of response.models) {
-            seen.set(model.key, model); // la segunda escritura sobreescribe la primera
+            seen.set(model.key, model);
     }
         return Array.from(seen.values());
     };
@@ -48,6 +49,7 @@ const ModelList = () => {
     };
 
     const onClickModel = async (key, display_name) => {
+        toast(`Cargando modelo: ${display_name}`, { type: 'info' });
         await unloadAllLoadedInstances();
 
         if (selectedModel?.instance_id) {
@@ -57,6 +59,7 @@ const ModelList = () => {
 
         const { instance_id } = await loadModel(key);
         console.log({ key, display_name, instance_id });
+        toast(`Modelo cargado: ${display_name}`, { type: 'success' });
         setSelectedModel({ display_name, instance_id, key });
     };
 
@@ -74,6 +77,8 @@ const ModelList = () => {
                     </li>
                 ))}
             </ul>
+
+        <Toaster richColors position="top" />
         </>
     );
 };
