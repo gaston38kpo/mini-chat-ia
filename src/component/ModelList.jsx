@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { getModelsList, loadModel, unloadModel } from "../service/service";
 import { useModelStore } from "../store/modelStore";
-import { Toaster, toast } from 'sonner';
+import { toast } from 'sonner';
 
 const ModelList = () => {
-    const { selectedModel, setSelectedModel } = useModelStore();
+    const setSelectedModel = useModelStore((state) => state.setSelectedModel);
     const [models, setModels] = useState([]);
+    const [loadingKey, setLoadingKey] = useState(null);
 
     const normalizeModels = (response) => {
         const seen = new Map();
         for (const model of response.models) {
             seen.set(model.key, model);
-    }
+        }
         return Array.from(seen.values());
     };
 
@@ -27,7 +28,7 @@ const ModelList = () => {
 
     const refreshModels = async () => {
         const response = await getModelsList();
-        
+
         const modelsList = normalizeModels(response);
 
         setModels(modelsList);
@@ -48,34 +49,41 @@ const ModelList = () => {
     };
 
     const onClickModel = async (key, display_name) => {
-        toast(`Cargando modelo: ${display_name}`, { type: 'info' });
-        await unloadAllLoadedInstances();
+        setLoadingKey(key);
 
-        if (selectedModel?.instance_id) {
-            unloadModel(selectedModel.instance_id);
+        try {
+            toast.info(`Cargando modelo: ${display_name}`);
+            await unloadAllLoadedInstances();
+
+            const { instance_id } = await loadModel(key);
+            toast.success(`Modelo cargado: ${display_name}`);
+            setSelectedModel({ display_name, instance_id, key });
+        } catch {
+            toast.error(`No se pudo cargar el modelo: ${display_name}`);
+        } finally {
+            setLoadingKey(null);
         }
-
-        const { instance_id } = await loadModel(key);
-        toast(`Modelo cargado: ${display_name}`, { type: 'success' });
-        setSelectedModel({ display_name, instance_id, key });
     };
 
-    useEffect(() => { refreshModels() }, []);
+    useEffect(() => {
+        refreshModels().catch(() => toast.error("No se pudo obtener la lista de modelos"));
+    }, []);
 
     return (
         <>
         <h1>Elegi un modelo y cargalo</h1>
             <ul>
-                {models && models.map((model) => (
+                {models.map((model) => (
                     <li key={model.key}>
-                        <button onClick={() => onClickModel(model.key, model.display_name)}>
+                        <button
+                            disabled={loadingKey !== null}
+                            onClick={() => onClickModel(model.key, model.display_name)}
+                        >
                             {model.display_name}
                         </button>
                     </li>
                 ))}
             </ul>
-
-        <Toaster richColors position="top" />
         </>
     );
 };

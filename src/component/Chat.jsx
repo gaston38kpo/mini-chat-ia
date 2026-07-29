@@ -1,36 +1,52 @@
 import React, { useState } from "react";
+import Markdown from "react-markdown";
 import { useModelStore } from "../store/modelStore";
 import { sendMessage } from "../service/service";
+import { toast } from "sonner";
+import { Comment } from 'react-loader-spinner';
 
 const Chat = () => {
-    const { selectedModel, setLastResponseId } = useModelStore();
+    const selectedModel = useModelStore((state) => state.selectedModel);
+    const setLastResponseId = useModelStore((state) => state.setLastResponseId);
     const [messages, setMessages] = useState([]);
     const [currentMessage, setCurrentMessage] = useState("");
+    const [isSending, setIsSending] = useState(false);
 
     const onSendMessage = async (event) => {
         event.preventDefault();
 
-        if (!currentMessage.trim()) return;
+        if (!currentMessage || isSending) return;
 
+        const text = currentMessage.trim();
+
+        setIsSending(true);
         setCurrentMessage("");
         setMessages((prev) => [
             ...prev,
-            { role: "user", content: currentMessage }
+            { role: "user", content: text }
         ]);
 
-        const res = await sendMessage(selectedModel.last_response_id, selectedModel.key, currentMessage);
-        console.log(res)
+        try {
+            const res = await sendMessage(selectedModel.last_response_id, selectedModel.key, text);
 
-        const [thinking, assistantMessage] = res?.output ?? [null, null];
+            const assistantMessage = res?.output?.find((item) => item.type === "message");
 
-        if (assistantMessage) {
-            setMessages((prev) => [
-                ...prev,
-                assistantMessage
-            ]);
+            if (assistantMessage) {
+                setMessages((prev) => [
+                    ...prev,
+                    assistantMessage
+                ]);
+            }
+
+            if (res?.response_id) {
+                setLastResponseId(res.response_id);
+            }
+        } catch {
+            toast.error("No se pudo enviar el mensaje");
+            setCurrentMessage(text);
+        } finally {
+            setIsSending(false);
         }
-
-        setLastResponseId(res.response_id);
     };
 
     const onChangeInputText = (e) => {
@@ -39,16 +55,39 @@ const Chat = () => {
 
     return <div>
         <h1>Mensajes</h1>
-        <form onSubmit={onSendMessage}>
-            <div>
-                {messages.map((message, index) => (
-                    <p key={`${message.role ?? "message"}-${index}`}>
-                        <strong>{message.role ?? "message"}:</strong> {message.content}
-                    </p>
-                ))}
-            </div>
-            <input type="text" name="message" value={currentMessage} onChange={onChangeInputText} />
-            <button type="submit">Enviar</button>
+        <div style={{ height: "300px", overflowY: "auto", border: "1px solid #ccc", padding: "8px", borderRadius: "8px" }}>
+            {messages.map((message, index) => (
+                <p key={`${message.role ?? "message"}-${index}`} style={{ margin: "12px 0", border: "1px solid #ccc", padding: "2px 8px", borderRadius: "8px" }}>
+                    <Markdown>{message.content}</Markdown>
+                    <span>{message.role || selectedModel.display_name}</span>
+                </p>
+            ))}
+
+            {isSending && (
+                <div >
+                    <Comment
+                        visible={true}
+                        height="40"
+                        width="40"
+                        ariaLabel="comment-loading"
+                        wrapperStyle={{}}
+                        wrapperClass="comment-wrapper"
+                        color="white"
+                        backgroundColor="blue"
+                    />
+                </div>
+            )}
+        </div>
+        <form onSubmit={onSendMessage} style={{ display: "flex", marginTop: "12px" }}>
+            <input
+                type="text"
+                name="message"
+                value={currentMessage}
+                onChange={onChangeInputText}
+                disabled={isSending}
+                style={{ marginRight: "8px", width: "100%" }}
+            />
+            <button type="submit" disabled={isSending}>Enviar</button>
         </form>
     </div>;
 };

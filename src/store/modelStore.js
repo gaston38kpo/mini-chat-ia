@@ -1,8 +1,10 @@
 import { create } from "zustand";
 
+const EMPTY_MODEL = { display_name: "", instance_id: "", key: "", last_response_id: null };
+
 export const useModelStore = create((set) => ({
-    selectedModel: {display_name: "", instance_id: "", key: "", last_response_id : null},
-    setSelectedModel: (model) => set({ selectedModel: model }),
+    selectedModel: EMPTY_MODEL,
+    setSelectedModel: (model) => set({ selectedModel: { ...EMPTY_MODEL, ...model } }),
     setLastResponseId: (last_response_id) => set((state) => ({
         selectedModel: {
             ...state.selectedModel,

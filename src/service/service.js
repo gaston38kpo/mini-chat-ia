@@ -1,49 +1,33 @@
-const BASE_URL = "http://192.168.1.68:1234/api/v1";
-
-const headers = { 'Content-Type': 'application/json' };
+import { headers, request } from "../helper/serviceHelper";
 
 // OBTENGO LOS MODELOS
 const getModelsList = async () => {
-    return await fetch(`${BASE_URL}/models`)
-        .then(response => response.json());
+    return await request('/models', undefined, 'getModelsList');
 }
 
 // CARGO UN MODELO
 const loadModel = async (modelKey) => {
     const jsBody = { model: modelKey };
 
-    return await fetch(`${BASE_URL}/models/load`, {
+    return await request('/models/load', {
         method: 'POST',
         headers,
         body: JSON.stringify(jsBody)
-    }).then(response => {
-        if (!response.ok) {
-            console.error(`loadModel error status: ${response.status}`);
-        }
-        return response.json();
-    }).catch(error => {
-        console.error(`loadModel error: ${error}`);
-    });
+    }, 'loadModel');
 }
 
 // DESCARGO UN MODELO
 const unloadModel = async (instanceId) => {
     const jsBody = { instance_id: instanceId };
 
-    return await fetch(`${BASE_URL}/models/unload`, {
+    return await request('/models/unload', {
         method: 'POST',
         headers,
         body: JSON.stringify(jsBody)
-    }).then(response => {
-        if (!response.ok) {
-            console.error(`unloadModel error status: ${response.status}`);
-        }
-        return response.json();
-    }).catch(error => {
-        console.error(`unloadModel error: ${error}`);
-    });
+    }, 'unloadModel');
 }
 
+// ENVIO UN MENSAJE AL MODELO
 const sendMessage = async (instanceId, model, input) => {
     const jsBody = { input, model };
 
@@ -51,18 +35,11 @@ const sendMessage = async (instanceId, model, input) => {
         jsBody.previous_response_id = instanceId;
     }
 
-    return await fetch(`${BASE_URL}/chat`, {
+    return await request('/chat', {
         method: 'POST',
         headers,
         body: JSON.stringify(jsBody)
-    }).then(response => {
-        if (!response.ok) {
-            console.error(`sendMessage error status: ${response.status}`);
-        }
-        return response.json();
-    }).catch(error => {
-        console.error(`sendMessage error: ${error}`);
-    });
+    }, 'sendMessage');
 }
 
 export {
