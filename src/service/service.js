@@ -7,6 +7,12 @@ const API_OPERATIONS = {
     SEND_MESSAGE: "sendMessage"
 };
 
+const parseLoadModelResponse = (response) => {
+    return {
+        instanceId: response?.instance_id ?? ""
+    };
+};
+
 const parseChatResponse = (response) => {
     const assistantMessage = response?.output?.find((item) => item.type === "message");
 
@@ -23,38 +29,40 @@ const getModelsList = async () => {
 
 // CARGO UN MODELO
 const loadModel = async (modelKey) => {
-    const jsBody = { model: modelKey };
+    const requestBody = { model: modelKey };
 
-    return await request("/models/load", {
+    const response = await request("/models/load", {
         method: "POST",
         headers,
-        body: JSON.stringify(jsBody)
+        body: JSON.stringify(requestBody)
     }, API_OPERATIONS.LOAD_MODEL);
+
+    return parseLoadModelResponse(response);
 };
 
 // DESCARGO UN MODELO
 const unloadModel = async (instanceId) => {
-    const jsBody = { instance_id: instanceId };
+    const requestBody = { instance_id: instanceId };
 
     return await request("/models/unload", {
         method: "POST",
         headers,
-        body: JSON.stringify(jsBody)
+        body: JSON.stringify(requestBody)
     }, API_OPERATIONS.UNLOAD_MODEL);
 };
 
 // ENVIO UN MENSAJE AL MODELO
 const sendMessage = async (instanceId, model, input) => {
-    const jsBody = { input, model };
+    const requestBody = { input, model };
 
     if (instanceId) {
-        jsBody.previous_response_id = instanceId;
+        requestBody.previous_response_id = instanceId;
     }
 
     return await request("/chat", {
         method: "POST",
         headers,
-        body: JSON.stringify(jsBody)
+        body: JSON.stringify(requestBody)
     }, API_OPERATIONS.SEND_MESSAGE);
 };
 

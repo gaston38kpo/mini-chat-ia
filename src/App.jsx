@@ -18,10 +18,10 @@ function App() {
             </span>
                 
             <small className="ms-2 px-2 py-1 fw-semibold text-success-emphasis bg-success-subtle border border-success-subtle rounded-2">
-            {selectedModel.display_name || "No hay modelo elegido"}
+            {selectedModel.displayName || "No hay modelo elegido"}
             </small>
 
-            {selectedModel.instance_id && <Chat/>}
+            {selectedModel.instanceId && <Chat/>}
 
             <Toaster richColors position="top-center" />
         </>
