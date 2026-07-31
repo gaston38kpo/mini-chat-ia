@@ -1,6 +1,5 @@
 import { create } from "zustand";
-
-const EMPTY_SELECTED_MODEL = { displayName: "", instanceId: "", key: "", lastResponseId: null };
+import { EMPTY_SELECTED_MODEL } from "../constants/appConstants";
 
 export const useModelStore = create((set) => ({
     selectedModel: EMPTY_SELECTED_MODEL,

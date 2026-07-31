@@ -1,11 +1,5 @@
 import { headers, request } from "../helper/serviceHelper";
-
-const API_OPERATIONS = {
-    GET_MODELS_LIST: "getModelsList",
-    LOAD_MODEL: "loadModel",
-    UNLOAD_MODEL: "unloadModel",
-    SEND_MESSAGE: "sendMessage"
-};
+import { API_OPERATIONS, API_PATHS } from "../constants/appConstants";
 
 /**
  * @param {object} response
@@ -36,7 +30,7 @@ const parseChatResponse = (response) => {
  * @throws {import("../helper/serviceHelper").ApiRequestError}
  */
 const getModelsList = async () => {
-    return await request("/models", undefined, API_OPERATIONS.GET_MODELS_LIST);
+    return await request(API_PATHS.MODELS, undefined, API_OPERATIONS.GET_MODELS_LIST);
 };
 
 /**
@@ -48,7 +42,7 @@ const getModelsList = async () => {
 const loadModel = async (modelKey) => {
     const requestBody = { model: modelKey };
 
-    const response = await request("/models/load", {
+    const response = await request(API_PATHS.MODELS_LOAD, {
         method: "POST",
         headers,
         body: JSON.stringify(requestBody)
@@ -66,7 +60,7 @@ const loadModel = async (modelKey) => {
 const unloadModel = async (instanceId) => {
     const requestBody = { instance_id: instanceId };
 
-    return await request("/models/unload", {
+    return await request(API_PATHS.MODELS_UNLOAD, {
         method: "POST",
         headers,
         body: JSON.stringify(requestBody)
@@ -88,7 +82,7 @@ const sendMessage = async (instanceId, model, input) => {
         requestBody.previous_response_id = instanceId;
     }
 
-    return await request("/chat", {
+    return await request(API_PATHS.CHAT, {
         method: "POST",
         headers,
         body: JSON.stringify(requestBody)

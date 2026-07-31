@@ -1,6 +1,8 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://192.168.1.68:1234/api/v1";
+import { CONTENT_TYPE_JSON, DEFAULT_API_BASE_URL } from "../constants/appConstants";
 
-const headers = { "Content-Type": "application/json" };
+const BASE_URL = DEFAULT_API_BASE_URL;
+
+const headers = { "Content-Type": CONTENT_TYPE_JSON };
 
 /**
  * Error enriquecido para fallos de red o respuestas no exitosas de la API.
