@@ -1,0 +1,19 @@
+.model-list-title {
+    margin: 0 !important;
+}
+
+.model-list .ant-list-items {
+    width: 100%;
+}
+
+.model-list-item {
+    padding: 12px 16px !important;
+}
+
+.model-list-row {
+    width: 100%;
+}
+
+.model-list-name {
+    font-weight: 500;
+}

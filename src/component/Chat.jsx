@@ -3,6 +3,7 @@ import { Button, Flex, Input, Space, Spin, Tag, Typography } from "antd";
 import Markdown from "react-markdown";
 import { useModelStore } from "../store/modelStore";
 import useChat from "./useChat";
+import "./Chat.css";
 
 const { Title, Text } = Typography;
 
@@ -18,24 +19,16 @@ const Chat = () => {
     } = useChat({ selectedModel, setLastResponseId });
 
     return (
-        <Flex vertical gap="middle" style={{ width: "100%" }}>
+        <Flex vertical gap="middle" className="chat-root">
             <Flex justify="space-between" align="center">
-                <Title level={5} style={{ margin: 0 }}>Mensajes</Title>
+                <Title level={5} className="chat-title">Mensajes</Title>
                 <Tag>{messages.length}</Tag>
             </Flex>
 
             <Flex
                 vertical
                 gap="middle"
-                style={{
-                    minHeight: 300,
-                    maxHeight: 500,
-                    overflowY: "auto",
-                    padding: 16,
-                    border: "1px solid #d9d9d9",
-                    borderRadius: 6,
-                    background: "#fafafa"
-                }}
+                className="chat-messages"
                 role="log"
                 aria-live="polite"
             >
@@ -47,20 +40,12 @@ const Chat = () => {
                     const isUserMessage = message.role === "user";
 
                     return (
-                        <Flex key={message.id} justify={isUserMessage ? "flex-end" : "flex-start"} style={{ width: "100%" }}>
-                            <div
-                                style={{
-                                    maxWidth: "80%",
-                                    padding: 12,
-                                    borderRadius: 6,
-                                    border: isUserMessage ? "1px solid #91d5ff" : "1px solid #d9d9d9",
-                                    background: isUserMessage ? "#e6f7ff" : "#ffffff"
-                                }}
-                            >
-                                <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 600 }}>
+                        <Flex key={message.id} justify={isUserMessage ? "flex-end" : "flex-start"} className="chat-message-row">
+                            <div className={`chat-bubble ${isUserMessage ? "chat-bubble-user" : "chat-bubble-assistant"}`}>
+                                <Text type="secondary" className="chat-bubble-role">
                                     {isUserMessage ? "Tu" : message.role || selectedModel.displayName}
                                 </Text>
-                                <div style={{ marginTop: 8 }}>
+                                <div className="chat-bubble-content">
                                     <Markdown>{message.content}</Markdown>
                                 </div>
                             </div>
@@ -77,7 +62,7 @@ const Chat = () => {
             </Flex>
 
             <form onSubmit={onSendMessage}>
-                <Space.Compact style={{ width: "100%" }}>
+                <Space.Compact className="chat-input-compact">
                     <Input
                         type="text"
                         name="message"

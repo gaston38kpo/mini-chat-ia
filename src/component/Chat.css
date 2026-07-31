@@ -1,1 +1,52 @@
+.chat-root {
+	width: 100%;
+}
+
+.chat-title {
+	margin: 0 !important;
+}
+
+.chat-messages {
+	min-height: 300px;
+	max-height: 500px;
+	overflow-y: auto;
+	padding: 16px;
+	border: 1px solid #d9d9d9;
+	border-radius: 6px;
+	background: #fafafa;
+}
+
+.chat-message-row {
+	width: 100%;
+}
+
+.chat-bubble {
+	max-width: 80%;
+	padding: 12px;
+	border-radius: 6px;
+}
+
+.chat-bubble-user {
+	border: 1px solid #91d5ff;
+	background: #e6f7ff;
+}
+
+.chat-bubble-assistant {
+	border: 1px solid #d9d9d9;
+	background: #ffffff;
+}
+
+.chat-bubble-role {
+	font-size: 12px;
+	text-transform: uppercase;
+	font-weight: 600;
+}
+
+.chat-bubble-content {
+	margin-top: 8px;
+}
+
+.chat-input-compact {
+	width: 100%;
+}
 

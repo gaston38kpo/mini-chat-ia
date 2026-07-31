@@ -2,6 +2,7 @@ import { Card, Layout, Space, Tag, Typography } from "antd";
 import ModelList from "./component/ModelList";
 import { useModelStore } from "./store/modelStore";
 import Chat from "./component/Chat";
+import "./App.css";
 
 const { Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
@@ -11,17 +12,24 @@ function App() {
     const hasSelectedModel = Boolean(selectedModel.instanceId);
 
     return (
-        <Layout style={{ minHeight: "100vh", background: "#f5f5f5" }}>
-            <Content style={{ padding: "24px", maxWidth: "1000px", margin: "0 auto", width: "100%" }}>
-                <Card bordered={false} styles={{ body: { padding: 24 } }}>
-                    <Space direction="vertical" size="large" style={{ width: "100%" }}>
+        <Layout className="app-layout">
+            <Content className="app-content">
+                <Card bordered={false} className="app-card">
+                    <Space direction="vertical" size="large" className="app-stack">
+
                         <header>
-                            <Space direction="vertical" size="small" style={{ width: "100%" }}>
-                                <Tag color="blue" style={{ width: "fit-content" }}>Mini Chat</Tag>
-                                <Title level={2} style={{ margin: 0 }}>Mini Chat IA</Title>
-                                <Paragraph type="secondary" style={{ margin: 0 }}>
+                            <Space direction="vertical" size="small" className="app-stack">
+
+                                <Tag color="blue" className="app-fit-content">Mini Chat</Tag>
+
+                                <Title level={2} className="app-title">
+                                    Mini Chat IA para API de LM Studio
+                                </Title>
+
+                                <Paragraph type="secondary" className="app-paragraph">
                                     Selecciona un modelo para comenzar la conversacion.
                                 </Paragraph>
+
                             </Space>
                         </header>
 
@@ -30,13 +38,19 @@ function App() {
                         </Card>
 
                         <Card type="inner">
-                            <Space direction="vertical" size="small" style={{ width: "100%" }}>
-                                <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase" }}>
+                            <Space direction="vertical" size="small" className="app-stack">
+
+                                <Text type="secondary" className="app-selected-label">
                                     Modelo seleccionado
                                 </Text>
-                                <Tag color={hasSelectedModel ? "green" : "default"} style={{ width: "fit-content", fontSize: 14 }}>
+
+                                <Tag
+                                    color={hasSelectedModel ? "green" : "default"}
+                                    className="app-selected-tag app-fit-content"
+                                >
                                     {selectedModel.displayName || "No hay modelo elegido"}
                                 </Tag>
+                                
                             </Space>
                         </Card>
 

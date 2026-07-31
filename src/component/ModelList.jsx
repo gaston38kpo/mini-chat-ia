@@ -1,6 +1,7 @@
 import { Button, Flex, List, Tag, Typography } from "antd";
 import { useModelStore } from "../store/modelStore";
 import useModelList from "./useModelList";
+import "./ModelList.css";
 
 const { Title } = Typography;
 
@@ -12,18 +13,19 @@ const ModelList = () => {
     return (
         <Flex vertical gap={16}>
             <Flex justify="space-between" align="center" gap={8} wrap>
-                <Title level={5} style={{ margin: 0 }}>Elige un modelo y cargalo</Title>
+                <Title level={5} className="model-list-title">Elige un modelo y cargalo</Title>
                 <Tag>{models.length} disponibles</Tag>
             </Flex>
 
             <List
                 bordered
                 split
+                className="model-list"
                 dataSource={models}
                 renderItem={(model) => (
-                    <List.Item key={model.key} style={{ padding: "12px 16px" }}>
-                        <Flex justify="space-between" align="center" gap={12} style={{ width: "100%" }} wrap>
-                            <span style={{ fontWeight: 500 }}>{model.displayName}</span>
+                    <List.Item key={model.key} className="model-list-item">
+                        <Flex justify="space-between" align="center" gap={12} className="model-list-row" wrap>
+                            <span className="model-list-name">{model.displayName}</span>
                             <Button
                                 type={loadingKey === model.key ? "dashed" : "primary"}
                                 loading={loadingKey === model.key}
