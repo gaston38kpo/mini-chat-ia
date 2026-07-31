@@ -1,13 +1,13 @@
 import React from "react";
 import Markdown from "react-markdown";
-import { useSelectedModel, useSetLastResponseId } from "../store/modelStore";
+import { useModelStore } from "../store/modelStore";
 import { Comment } from "react-loader-spinner";
 import useChat from "./useChat";
 import "./Chat.css";
 
 const Chat = () => {
-    const selectedModel = useSelectedModel();
-    const setLastResponseId = useSetLastResponseId();
+    const selectedModel = useModelStore((state) => state.selectedModel);
+    const setLastResponseId = useModelStore((state) => state.setLastResponseId);
     const {
         messages,
         currentMessage,

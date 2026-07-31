@@ -1,9 +1,9 @@
 import React from "react";
-import { useSetSelectedModel } from "../store/modelStore";
+import { useModelStore } from "../store/modelStore";
 import useModelList from "./useModelList";
 
 const ModelList = () => {
-    const setSelectedModel = useSetSelectedModel();
+    const setSelectedModel = useModelStore((state) => state.setSelectedModel);
     const { models, loadingKey, onClickModel } = useModelList({ setSelectedModel });
 
     return (

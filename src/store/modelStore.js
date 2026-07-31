@@ -12,7 +12,3 @@ export const useModelStore = create((set) => ({
         }
     }))
 }));
-
-export const useSelectedModel = () => useModelStore((state) => state.selectedModel);
-export const useSetSelectedModel = () => useModelStore((state) => state.setSelectedModel);
-export const useSetLastResponseId = () => useModelStore((state) => state.setLastResponseId);

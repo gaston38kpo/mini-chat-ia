@@ -1,5 +1,3 @@
-import { logError } from "./logger";
-
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://192.168.1.68:1234/api/v1";
 
 const headers = { "Content-Type": "application/json" };
@@ -22,7 +20,7 @@ const request = async (path, options = {}, operation = "request") => {
     try {
         response = await fetch(`${BASE_URL}${path}`, options);
     } catch (error) {
-        logError(`${operation} network error`, error);
+        console.error(`${operation} network error`, error);
         throw new ApiRequestError(`${operation} network error`, {
             operation,
             path,
@@ -38,7 +36,7 @@ const request = async (path, options = {}, operation = "request") => {
             path,
             body: responseBody
         });
-        logError(`${operation} response error`, error);
+        console.error(`${operation} response error`, error);
         throw error;
     }
 
