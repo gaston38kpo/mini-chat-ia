@@ -2,6 +2,12 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { getModelsList, loadModel, unloadModel } from "../service/service";
 import { getLoadedInstanceIds, normalizeModels } from "../helper/modelHelper";
+import {
+    TOAST_MESSAGES,
+    getLoadedModelMessage,
+    getLoadingModelMessage,
+    getLoadModelErrorMessage
+} from "../helper/toastMessages";
 
 const useModelList = ({ setSelectedModel }) => {
     const [models, setModels] = useState([]);
@@ -32,15 +38,15 @@ const useModelList = ({ setSelectedModel }) => {
         setLoadingKey(key);
 
         try {
-            toast.info(`Cargando modelo: ${displayName}`);
+            toast.info(getLoadingModelMessage(displayName));
             await unloadAllLoadedInstances();
 
             const { instanceId } = await loadModel(key);
-            toast.success(`Modelo cargado: ${displayName}`);
+            toast.success(getLoadedModelMessage(displayName));
             setSelectedModel({ displayName, instanceId, key });
         } catch (error) {
             console.error("Error loading model", error);
-            toast.error(`No se pudo cargar el modelo: ${displayName}`);
+            toast.error(getLoadModelErrorMessage(displayName));
         } finally {
             setLoadingKey(null);
         }
@@ -49,7 +55,7 @@ const useModelList = ({ setSelectedModel }) => {
     useEffect(() => {
         refreshModels().catch((error) => {
             console.error("Error fetching model list", error);
-            toast.error("No se pudo obtener la lista de modelos");
+            toast.error(TOAST_MESSAGES.MODELS_FETCH_ERROR);
         });
     }, []);
 

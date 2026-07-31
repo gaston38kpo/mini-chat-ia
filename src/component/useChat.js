@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { parseChatResponse, sendMessage } from "../service/service";
 import { createAssistantMessage, createUserMessage } from "../helper/chatHelper";
+import { TOAST_MESSAGES } from "../helper/toastMessages";
 
 const useChat = ({ selectedModel, setLastResponseId }) => {
     const [messages, setMessages] = useState([]);
@@ -11,9 +12,16 @@ const useChat = ({ selectedModel, setLastResponseId }) => {
     const onSendMessage = async (event) => {
         event.preventDefault();
 
-        if (!currentMessage || isSending) return;
+        if (isSending) return;
+
+        if (!selectedModel?.key) {
+            toast.error(TOAST_MESSAGES.CHAT_SEND_ERROR);
+            return;
+        }
 
         const text = currentMessage.trim();
+
+        if (!text) return;
 
         setIsSending(true);
         setCurrentMessage("");
@@ -38,7 +46,7 @@ const useChat = ({ selectedModel, setLastResponseId }) => {
             }
         } catch (error) {
             console.error("Error sending chat message", error);
-            toast.error("No se pudo enviar el mensaje");
+            toast.error(TOAST_MESSAGES.CHAT_SEND_ERROR);
             setCurrentMessage(text);
         } finally {
             setIsSending(false);

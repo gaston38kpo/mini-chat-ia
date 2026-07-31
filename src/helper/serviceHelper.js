@@ -2,6 +2,9 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://192.168.1.68:1234/
 
 const headers = { "Content-Type": "application/json" };
 
+/**
+ * Error enriquecido para fallos de red o respuestas no exitosas de la API.
+ */
 class ApiRequestError extends Error {
     constructor(message, details = {}) {
         super(message);
@@ -14,6 +17,14 @@ class ApiRequestError extends Error {
     }
 }
 
+/**
+ * Ejecuta requests HTTP a la API configurada y normaliza errores.
+ * @param {string} path
+ * @param {RequestInit} [options={}]
+ * @param {string} [operation="request"]
+ * @returns {Promise<any>}
+ * @throws {ApiRequestError}
+ */
 const request = async (path, options = {}, operation = "request") => {
     let response;
 
