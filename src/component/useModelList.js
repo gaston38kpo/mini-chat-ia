@@ -57,6 +57,10 @@ const useModelList = ({ setSelectedModel }) => {
             console.error("Error fetching model list", error);
             message.error(TOAST_MESSAGES.MODELS_FETCH_ERROR);
         });
+
+        return () => {
+            unloadAllLoadedInstances()
+        };
     }, []);
 
     return {
