@@ -1,30 +1,54 @@
-import "./App.css";
+import { Card, Layout, Space, Tag, Typography } from "antd";
 import ModelList from "./component/ModelList";
 import { useModelStore } from "./store/modelStore";
 import Chat from "./component/Chat";
-import { Toaster } from "sonner";
+
+const { Content } = Layout;
+const { Title, Paragraph, Text } = Typography;
 
 function App() {
     const selectedModel = useModelStore((state) => state.selectedModel);
+    const hasSelectedModel = Boolean(selectedModel.instanceId);
 
     return (
-        <>
-            <h1>Mini Chat IA</h1>
+        <Layout style={{ minHeight: "100vh", background: "#f5f5f5" }}>
+            <Content style={{ padding: "24px", maxWidth: "1000px", margin: "0 auto", width: "100%" }}>
+                <Card bordered={false} styles={{ body: { padding: 24 } }}>
+                    <Space direction="vertical" size="large" style={{ width: "100%" }}>
+                        <header>
+                            <Space direction="vertical" size="small" style={{ width: "100%" }}>
+                                <Tag color="blue" style={{ width: "fit-content" }}>Mini Chat</Tag>
+                                <Title level={2} style={{ margin: 0 }}>Mini Chat IA</Title>
+                                <Paragraph type="secondary" style={{ margin: 0 }}>
+                                    Selecciona un modelo para comenzar la conversacion.
+                                </Paragraph>
+                            </Space>
+                        </header>
 
-            <ModelList />
+                        <Card type="inner" title="Modelos disponibles">
+                            <ModelList />
+                        </Card>
 
-            <span>
-                Modelo Seleccionado:
-            </span>
-                
-            <small className="ms-2 px-2 py-1 fw-semibold text-success-emphasis bg-success-subtle border border-success-subtle rounded-2">
-            {selectedModel.displayName || "No hay modelo elegido"}
-            </small>
+                        <Card type="inner">
+                            <Space direction="vertical" size="small" style={{ width: "100%" }}>
+                                <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase" }}>
+                                    Modelo seleccionado
+                                </Text>
+                                <Tag color={hasSelectedModel ? "green" : "default"} style={{ width: "fit-content", fontSize: 14 }}>
+                                    {selectedModel.displayName || "No hay modelo elegido"}
+                                </Tag>
+                            </Space>
+                        </Card>
 
-            {selectedModel.instanceId && <Chat/>}
-
-            <Toaster richColors position="top-center" />
-        </>
+                        {hasSelectedModel && (
+                            <Card type="inner" title="Conversacion">
+                                <Chat />
+                            </Card>
+                        )}
+                    </Space>
+                </Card>
+            </Content>
+        </Layout>
     );
 }
 

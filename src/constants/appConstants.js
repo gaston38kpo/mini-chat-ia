@@ -16,7 +16,12 @@ const API_OPERATIONS = {
     SEND_MESSAGE: "sendMessage"
 };
 
-const EMPTY_SELECTED_MODEL = { displayName: "", instanceId: "", key: "", lastResponseId: null };
+const EMPTY_SELECTED_MODEL = {
+    displayName: "",
+    instanceId: "",
+    key: "",
+    lastResponseId: null
+};
 
 const TOAST_MESSAGES = {
     CHAT_SEND_ERROR: "No se pudo enviar el mensaje",

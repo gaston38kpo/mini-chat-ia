@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { message } from "antd";
 import { getModelsList, loadModel, unloadModel } from "../service/service";
 import { getLoadedInstanceIds, normalizeModels } from "../helper/modelHelper";
 import {
@@ -38,15 +38,15 @@ const useModelList = ({ setSelectedModel }) => {
         setLoadingKey(key);
 
         try {
-            toast.info(getLoadingModelMessage(displayName));
+            message.info(getLoadingModelMessage(displayName));
             await unloadAllLoadedInstances();
 
             const { instanceId } = await loadModel(key);
-            toast.success(getLoadedModelMessage(displayName));
+            message.success(getLoadedModelMessage(displayName));
             setSelectedModel({ displayName, instanceId, key });
         } catch (error) {
             console.error("Error loading model", error);
-            toast.error(getLoadModelErrorMessage(displayName));
+            message.error(getLoadModelErrorMessage(displayName));
         } finally {
             setLoadingKey(null);
         }
@@ -55,7 +55,7 @@ const useModelList = ({ setSelectedModel }) => {
     useEffect(() => {
         refreshModels().catch((error) => {
             console.error("Error fetching model list", error);
-            toast.error(TOAST_MESSAGES.MODELS_FETCH_ERROR);
+            message.error(TOAST_MESSAGES.MODELS_FETCH_ERROR);
         });
     }, []);
 
