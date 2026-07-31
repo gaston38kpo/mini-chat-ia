@@ -1,9 +1,26 @@
 import React, { useState } from "react";
 import Markdown from "react-markdown";
 import { useModelStore } from "../store/modelStore";
-import { sendMessage } from "../service/service";
+import { parseChatResponse, sendMessage } from "../service/service";
 import { toast } from "sonner";
-import { Comment } from 'react-loader-spinner';
+import { Comment } from "react-loader-spinner";
+
+const createMessageId = () => {
+    return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `message-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
+
+const createUserMessage = (content) => ({
+    id: createMessageId(),
+    role: "user",
+    content
+});
+
+const createAssistantMessage = (message) => ({
+    id: createMessageId(),
+    ...message
+});
 
 const Chat = () => {
     const selectedModel = useModelStore((state) => state.selectedModel);
@@ -23,25 +40,25 @@ const Chat = () => {
         setCurrentMessage("");
         setMessages((prev) => [
             ...prev,
-            { role: "user", content: text }
+            createUserMessage(text)
         ]);
 
         try {
             const res = await sendMessage(selectedModel.last_response_id, selectedModel.key, text);
-
-            const assistantMessage = res?.output?.find((item) => item.type === "message");
+            const { assistantMessage, responseId } = parseChatResponse(res);
 
             if (assistantMessage) {
                 setMessages((prev) => [
                     ...prev,
-                    assistantMessage
+                    createAssistantMessage(assistantMessage)
                 ]);
             }
 
-            if (res?.response_id) {
-                setLastResponseId(res.response_id);
+            if (responseId) {
+                setLastResponseId(responseId);
             }
-        } catch {
+        } catch (error) {
+            console.error("Error sending chat message", error);
             toast.error("No se pudo enviar el mensaje");
             setCurrentMessage(text);
         } finally {
@@ -56,8 +73,8 @@ const Chat = () => {
     return <div>
         <h1>Mensajes</h1>
         <div style={{ height: "300px", overflowY: "auto", border: "1px solid #ccc", padding: "8px", borderRadius: "8px" }}>
-            {messages.map((message, index) => (
-                <p key={`${message.role ?? "message"}-${index}`} style={{ margin: "12px 0", border: "1px solid #ccc", padding: "2px 8px", borderRadius: "8px" }}>
+            {messages.map((message) => (
+                <p key={message.id} style={{ margin: "12px 0", border: "1px solid #ccc", padding: "2px 8px", borderRadius: "8px" }}>
                     <Markdown>{message.content}</Markdown>
                     <span>{message.role || selectedModel.display_name}</span>
                 </p>

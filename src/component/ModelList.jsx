@@ -1,30 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { getModelsList, loadModel, unloadModel } from "../service/service";
 import { useModelStore } from "../store/modelStore";
-import { toast } from 'sonner';
+import { toast } from "sonner";
+import { getLoadedInstanceIds, normalizeModels } from "../helper/modelHelper";
 
 const ModelList = () => {
     const setSelectedModel = useModelStore((state) => state.setSelectedModel);
     const [models, setModels] = useState([]);
     const [loadingKey, setLoadingKey] = useState(null);
-
-    const normalizeModels = (response) => {
-        const seen = new Map();
-        for (const model of response.models) {
-            seen.set(model.key, model);
-        }
-        return Array.from(seen.values());
-    };
-
-    const getLoadedInstanceIds = (models) => {
-        return [...new Set(
-            models.flatMap((model) =>
-            Array.isArray(model.loaded_instances)
-                ? model.loaded_instances.map(instance => instance.id).filter(Boolean)
-                : []
-            )
-        )];
-    };
 
     const refreshModels = async () => {
         const response = await getModelsList();
@@ -42,7 +25,7 @@ const ModelList = () => {
         if (!loadedInstanceIds.length) return;
 
         await Promise.all(
-            loadedInstanceIds.map(instanceId => unloadModel(instanceId))
+            loadedInstanceIds.map((instanceId) => unloadModel(instanceId))
         );
 
         await refreshModels();
@@ -58,7 +41,8 @@ const ModelList = () => {
             const { instance_id } = await loadModel(key);
             toast.success(`Modelo cargado: ${display_name}`);
             setSelectedModel({ display_name, instance_id, key });
-        } catch {
+        } catch (error) {
+            console.error("Error loading model", error);
             toast.error(`No se pudo cargar el modelo: ${display_name}`);
         } finally {
             setLoadingKey(null);
@@ -66,7 +50,10 @@ const ModelList = () => {
     };
 
     useEffect(() => {
-        refreshModels().catch(() => toast.error("No se pudo obtener la lista de modelos"));
+        refreshModels().catch((error) => {
+            console.error("Error fetching model list", error);
+            toast.error("No se pudo obtener la lista de modelos");
+        });
     }, []);
 
     return (
