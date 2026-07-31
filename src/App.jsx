@@ -1,11 +1,11 @@
 import "./App.css";
 import ModelList from "./component/ModelList";
-import { useModelStore } from "./store/modelStore";
+import { useSelectedModel } from "./store/modelStore";
 import Chat from "./component/Chat";
 import { Toaster } from "sonner";
 
 function App() {
-    const selectedModel = useModelStore((state) => state.selectedModel);
+    const selectedModel = useSelectedModel();
 
     return (
         <>

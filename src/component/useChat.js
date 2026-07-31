@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { parseChatResponse, sendMessage } from "../service/service";
 import { createAssistantMessage, createUserMessage } from "../helper/chatHelper";
+import { logError } from "../helper/logger";
 
 const useChat = ({ selectedModel, setLastResponseId }) => {
     const [messages, setMessages] = useState([]);
@@ -37,7 +38,7 @@ const useChat = ({ selectedModel, setLastResponseId }) => {
                 setLastResponseId(responseId);
             }
         } catch (error) {
-            console.error("Error sending chat message", error);
+            logError("Error sending chat message", error);
             toast.error("No se pudo enviar el mensaje");
             setCurrentMessage(text);
         } finally {
