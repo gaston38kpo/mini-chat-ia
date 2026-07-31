@@ -17,7 +17,7 @@ function App() {
                 Modelo Seleccionado:
             </span>
                 
-            <small className="d-inline-flex mb-3 px-2 py-1 fw-semibold text-success-emphasis bg-success-subtle border border-success-subtle rounded-2">
+            <small className="ms-2 px-2 py-1 fw-semibold text-success-emphasis bg-success-subtle border border-success-subtle rounded-2">
             {selectedModel.display_name || "No hay modelo elegido"}
             </small>
 
