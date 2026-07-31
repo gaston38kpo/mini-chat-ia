@@ -13,8 +13,15 @@ const ModelList = () => {
     return (
         <Flex vertical gap={16}>
             <Flex justify="space-between" align="center" gap={8} wrap>
-                <Title level={5} className="model-list-title">Elige un modelo y cargalo</Title>
-                <Tag>{models.length} disponibles</Tag>
+
+                <Title level={5} className="model-list-title">
+                    Elegí uno
+                </Title>
+
+                <Tag>
+                    {models.length} disponibles
+                </Tag>
+
             </Flex>
 
             <List
@@ -25,7 +32,11 @@ const ModelList = () => {
                 renderItem={(model) => (
                     <List.Item key={model.key} className="model-list-item">
                         <Flex justify="space-between" align="center" gap={12} className="model-list-row" wrap>
-                            <span className="model-list-name">{model.displayName}</span>
+
+                            <span className="model-list-name">
+                                {model.displayName}
+                            </span>
+
                             <Button
                                 type={loadingKey === model.key ? "dashed" : "primary"}
                                 loading={loadingKey === model.key}
@@ -35,6 +46,7 @@ const ModelList = () => {
                             >
                                 {loadingKey === model.key ? "Cargando..." : "Cargar"}
                             </Button>
+
                         </Flex>
                     </List.Item>
                 )}

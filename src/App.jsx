@@ -27,13 +27,13 @@ function App() {
                                 </Title>
 
                                 <Paragraph type="secondary" className="app-paragraph">
-                                    Selecciona un modelo para comenzar la conversacion.
+                                    Selecciona un modelo para chatear.
                                 </Paragraph>
 
                             </Space>
                         </header>
 
-                        <Card type="inner" title="Modelos disponibles">
+                        <Card type="inner" title="Modelos disponibles en LM Studio">
                             <ModelList />
                         </Card>
 
@@ -50,7 +50,7 @@ function App() {
                                 >
                                     {selectedModel.displayName || "No hay modelo elegido"}
                                 </Tag>
-                                
+
                             </Space>
                         </Card>
 
