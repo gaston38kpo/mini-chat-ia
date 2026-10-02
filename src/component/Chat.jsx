@@ -43,7 +43,7 @@ const Chat = () => {
                         <Flex key={message.id} justify={isUserMessage ? "flex-end" : "flex-start"} className="chat-message-row">
                             <div className={`chat-bubble ${isUserMessage ? "chat-bubble-user" : "chat-bubble-assistant"}`}>
                                 <Text type="secondary" className="chat-bubble-role">
-                                    {isUserMessage ? "Tu" : message.role || selectedModel.displayName}
+                                    {isUserMessage ? "Tu" : message.modelName || selectedModel.displayName}
                                 </Text>
                                 <div className="chat-bubble-content">
                                     <Markdown>{message.content}</Markdown>
@@ -53,7 +53,7 @@ const Chat = () => {
                     );
                 })}
 
-                {isSending && (
+                {isSending && !messages[messages.length - 1]?.content && (
                     <Flex align="center" gap="small">
                         <Spin size="small" />
                         <Text type="secondary">Esperando respuesta...</Text>

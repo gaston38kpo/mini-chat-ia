@@ -10,9 +10,10 @@ const createUserMessage = (content) => ({
     content
 });
 
-const createAssistantMessage = (message) => ({
+const createAssistantMessage = (modelName = "") => ({
     id: createMessageId(),
-    ...message
+    content: "",
+    modelName
 });
 
 export {

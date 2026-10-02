@@ -20,9 +20,9 @@ class ApiRequestError extends Error {
 }
 
 /**
- * Ejecuta requests HTTP a la API configurada y normaliza errores.
+ * Ejecuta el fetch contra la API configurada y normaliza errores.
  */
-const request = async (path, options = {}, operation = "request") => {
+const fetchResponse = async (path, options, operation) => {
     let response;
 
     try {
@@ -48,7 +48,43 @@ const request = async (path, options = {}, operation = "request") => {
         throw error;
     }
 
+    return response;
+};
+
+/**
+ * Ejecuta requests HTTP a la API configurada y devuelve el JSON.
+ */
+const request = async (path, options = {}, operation = "request") => {
+    const response = await fetchResponse(path, options, operation);
+
     return response.json();
 };
 
-export { request, headers, ApiRequestError };
+/**
+ * Ejecuta un request en streaming (SSE) e invoca onEvent por cada evento recibido.
+ */
+const requestStream = async (path, options, operation, onEvent) => {
+    const response = await fetchResponse(path, options, operation);
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    for (;;) {
+        const { done, value } = await reader.read();
+
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split("\n");
+        buffer = lines.pop();
+
+        for (const line of lines) {
+            if (!line.startsWith("data:")) continue;
+
+            onEvent(JSON.parse(line.slice(5).trim()));
+        }
+    }
+};
+
+export { request, requestStream, headers, ApiRequestError };

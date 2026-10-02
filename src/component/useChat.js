@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { message } from "antd";
-import { parseChatResponse, sendMessage } from "../service/service";
+import { sendMessage } from "../service/service";
 import { createAssistantMessage, createUserMessage } from "../helper/chatHelper";
 import { TOAST_MESSAGES } from "../helper/toastMessages";
 
@@ -25,21 +25,26 @@ const useChat = ({ selectedModel, setLastResponseId }) => {
 
         setIsSending(true);
         setCurrentMessage("");
+
+        const assistantMessage = createAssistantMessage(selectedModel.displayName);
+
         setMessages((prev) => [
             ...prev,
-            createUserMessage(text)
+            createUserMessage(text),
+            assistantMessage
         ]);
 
         try {
-            const response = await sendMessage(selectedModel.lastResponseId, selectedModel.key, text);
-            const { assistantMessage, responseId } = parseChatResponse(response);
-
-            if (assistantMessage) {
-                setMessages((prev) => [
-                    ...prev,
-                    createAssistantMessage(assistantMessage)
-                ]);
-            }
+            const responseId = await sendMessage(
+                selectedModel.lastResponseId,
+                selectedModel.key,
+                text,
+                (token) => setMessages((prev) => prev.map((item) => (
+                    item.id === assistantMessage.id
+                        ? { ...item, content: item.content + token }
+                        : item
+                )))
+            );
 
             if (responseId) {
                 setLastResponseId(responseId);
@@ -48,6 +53,7 @@ const useChat = ({ selectedModel, setLastResponseId }) => {
             console.error("Error sending chat message", error);
             message.error(TOAST_MESSAGES.CHAT_SEND_ERROR);
             setCurrentMessage(text);
+            setMessages((prev) => prev.filter((item) => item.id !== assistantMessage.id));
         } finally {
             setIsSending(false);
         }

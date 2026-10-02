@@ -1,20 +1,10 @@
-import { headers, request } from "../helper/serviceHelper";
+import { headers, request, requestStream } from "../helper/serviceHelper";
 import { API_OPERATIONS, API_PATHS } from "../constants/appConstants";
 
 
 const parseLoadModelResponse = (response) => {
     return {
         instanceId: response?.instance_id ?? ""
-    };
-};
-
-
-const parseChatResponse = (response) => {
-    const assistantMessage = response?.output?.find((item) => item.type === "message");
-
-    return {
-        assistantMessage,
-        responseId: response?.response_id
     };
 };
 
@@ -54,27 +44,38 @@ const unloadModel = async (instanceId) => {
 };
 
 /**
- * Envía un mensaje al modelo cargado.
+ * Envía un mensaje al modelo cargado y notifica cada token recibido.
+ * Devuelve el response_id final para mantener el contexto de la conversación.
  */
-const sendMessage = async (instanceId, model, input) => {
-    const requestBody = { input, model };
+const sendMessage = async (instanceId, model, input, onToken) => {
+    const requestBody = { input, model, stream: true };
 
     if (instanceId) {
         requestBody.previous_response_id = instanceId;
     }
 
-    return await request(API_PATHS.CHAT, {
+    let responseId;
+
+    await requestStream(API_PATHS.CHAT, {
         method: "POST",
         headers,
         body: JSON.stringify(requestBody)
-    }, API_OPERATIONS.SEND_MESSAGE);
+    }, API_OPERATIONS.SEND_MESSAGE, (event) => {
+        if (event.type === "message.delta") {
+            onToken(event.content);
+        } else if (event.type === "chat.end") {
+            responseId = event.result?.response_id;
+        }
+        // ponytail: reasoning.delta ignorado; añadir burbuja propia si se usan modelos con razonamiento
+    });
+
+    return responseId;
 };
 
 export {
     getModelsList,
     loadModel,
     unloadModel,
-    sendMessage,
-    parseChatResponse
+    sendMessage
 };
     
