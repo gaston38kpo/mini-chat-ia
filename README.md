@@ -1,16 +1,55 @@
-# React + Vite
+# Mini Chat IA
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Plantilla base para construir chats de IA con backend **pluggable**. Hoy incluye
+dos adaptadores -- LM Studio (gestiona modelos) y cualquier API compatible con
+OpenAI -- detras de una sola interfaz (`ChatProvider`). El resto de la app no
+sabe cual esta activo. Ver [`docs/arquitectura.md`](docs/arquitectura.md).
 
-Currently, two official plugins are available:
+## Inicio rapido
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+Abre la URL que imprime Vite y elegi un modelo para empezar a chatear.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Variables de entorno
 
-## Expanding the Oxlint configuration
+Crea un `.env` en la raiz. Todas son opcionales:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+| Variable | Descripcion | Default |
+| --- | --- | --- |
+| `VITE_API_BASE_URL` | URL base del backend. | `http://192.168.1.68:1234/api/v1` |
+| `VITE_PROVIDER` | Clave del provider (`lmstudio`, `openai-compatible`). | `lmstudio` |
+| `VITE_API_KEY` | API key para backends que la usan. | `""` (vacio) |
+
+## Scripts
+
+| Script | Que hace |
+| --- | --- |
+| `npm run dev` | Servidor de desarrollo de Vite. |
+| `npm run build` | Build de produccion. |
+| `npm run lint` | Corre Oxlint. |
+| `npm run typecheck` | TypeScript en modo `--noEmit`. |
+| `npm run preview` | Previsualiza el build. |
+
+## Cambiar de backend
+
+Define `VITE_PROVIDER` con la clave del provider. Para crear uno nuevo, segui
+la guia: [`docs/providers.md`](docs/providers.md).
+
+## Estructura
+
+| Carpeta | Contenido |
+| --- | --- |
+| `src/chat/providers/` | Adaptadores `ChatProvider` y el registro. |
+| `src/component/` | Componentes y hooks (`Chat.tsx`, `useChat.ts`, ...). |
+| `src/helper/` | Transporte (`serviceHelper`) y utilidades. |
+| `src/constants/` | Config y env (`appConstants.ts`). |
+| `src/store/` | Store Zustand (`modelStore.ts`). |
+
+## Documentacion
+
+- [`docs/arquitectura.md`](docs/arquitectura.md) -- capas, flujo y estado.
+- [`docs/providers.md`](docs/providers.md) -- como agregar un provider.

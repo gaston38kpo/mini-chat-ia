@@ -1,10 +1,10 @@
 schema: spec-driven
 
 context: |
-  Tech stack: React 19 + Vite 8 + JavaScript (ES modules) + Zustand 5
-  Architecture: Single-page React app with component/service/store layers
+  Tech stack: React 19 + Vite 8 + TypeScript 7 (strict) + Zustand 5
+  Architecture: Single-page React app with component/provider/helper/store layers
   Testing: No test runner installed (strict TDD disabled)
-  Style: Oxlint for React/Oxc rules; no formatter or type checker configured
+  Style: Oxlint for React/Oxc rules; no formatter configured; TypeScript strict type checks via tsc
 
 strict_tdd: false
 
@@ -22,12 +22,13 @@ rules:
     - Keep tasks completable in one session
   apply:
     guidance:
-      - Follow existing code patterns in src/component, src/service, src/store
+      - Follow existing code patterns in src/component, src/chat/providers, src/helper, src/store
     tdd: false
     test_command: ""
   verify:
     test_command: ""
     build_command: "npm run build"
+    typecheck_command: "npm run typecheck"
     coverage_threshold: 0
   archive:
     - Warn before merging destructive deltas
@@ -58,9 +59,9 @@ testing:
       name: oxlint
       command: npm run lint
     type_checker:
-      available: false
-      name: none
-      command: ""
+      available: true
+      name: typescript
+      command: npm run typecheck
     formatter:
       available: false
       name: none
