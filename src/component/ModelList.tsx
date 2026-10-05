@@ -9,7 +9,7 @@ const ModelList = () => {
     const setSelectedModel = useModelStore((state) => state.setSelectedModel);
     const { models, loadingKey, canManageModels, onClickModel } = useModelList({ setSelectedModel });
     const isLoading = canManageModels && loadingKey !== null;
-    const getActionLabel = (key) => {
+    const getActionLabel = (key: string): string => {
         if (!canManageModels) return "Elegir";
 
         return loadingKey === key ? "Montando..." : "Montar";

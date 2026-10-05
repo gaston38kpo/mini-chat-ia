@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { message } from "antd";
 import { chatProvider } from "../chat/providers";
 import { getLoadedInstanceIds } from "../helper/modelHelper";
+import type { ChatModel } from "../chat/providers/chatProvider.contract";
+import type { SelectedModel } from "../constants/appConstants";
 import {
     TOAST_MESSAGES,
     getLoadedModelMessage,
@@ -9,19 +11,23 @@ import {
     getLoadModelErrorMessage
 } from "../helper/toastMessages";
 
-const useModelList = ({ setSelectedModel }) => {
-    const [models, setModels] = useState([]);
-    const [loadingKey, setLoadingKey] = useState(null);
+interface UseModelListParams {
+    setSelectedModel: (selectedModelDetails: Partial<SelectedModel>) => void;
+}
+
+const useModelList = ({ setSelectedModel }: UseModelListParams) => {
+    const [models, setModels] = useState<ChatModel[]>([]);
+    const [loadingKey, setLoadingKey] = useState<string | null>(null);
     const canManageModels = chatProvider.capabilities.canManageModels;
 
-    const refreshModels = async () => {
+    const refreshModels = async (): Promise<ChatModel[]> => {
         const modelsList = await chatProvider.listModels();
 
         setModels(modelsList);
         return modelsList;
     };
 
-    const unloadAllLoadedInstances = async () => {
+    const unloadAllLoadedInstances = async (): Promise<void> => {
         const modelsList = await refreshModels();
         const loadedInstanceIds = getLoadedInstanceIds(modelsList);
 
@@ -34,7 +40,7 @@ const useModelList = ({ setSelectedModel }) => {
         await refreshModels();
     };
 
-    const onClickModel = async (key, displayName) => {
+    const onClickModel = async (key: string, displayName: string): Promise<void> => {
         if (!canManageModels) {
             setSelectedModel({ displayName, instanceId: "", key });
             return;
@@ -64,7 +70,7 @@ const useModelList = ({ setSelectedModel }) => {
         });
 
         return () => {
-            unloadAllLoadedInstances()
+            unloadAllLoadedInstances();
         };
     }, []);
 

@@ -1,15 +1,23 @@
 import { useState } from "react";
+import type React from "react";
 import { message } from "antd";
 import { chatProvider } from "../chat/providers";
 import { createAssistantMessage, createUserMessage } from "../helper/chatHelper";
 import { TOAST_MESSAGES } from "../helper/toastMessages";
+import type { ChatMessage } from "../chat/providers/chatProvider.contract";
+import type { SelectedModel } from "../constants/appConstants";
 
-const useChat = ({ selectedModel, setLastResponseId }) => {
-    const [messages, setMessages] = useState([]);
-    const [currentMessage, setCurrentMessage] = useState("");
-    const [isSending, setIsSending] = useState(false);
+interface UseChatParams {
+    selectedModel: SelectedModel;
+    setLastResponseId: (lastResponseId: string | null) => void;
+}
 
-    const onSendMessage = async (event) => {
+const useChat = ({ selectedModel, setLastResponseId }: UseChatParams) => {
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [currentMessage, setCurrentMessage] = useState<string>("");
+    const [isSending, setIsSending] = useState<boolean>(false);
+
+    const onSendMessage = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
         event.preventDefault();
 
         if (isSending) return;
@@ -60,7 +68,7 @@ const useChat = ({ selectedModel, setLastResponseId }) => {
         }
     };
 
-    const onChangeInputText = (event) => {
+    const onChangeInputText = (event: React.ChangeEvent<HTMLInputElement>): void => {
         setCurrentMessage(event.target.value);
     };
 

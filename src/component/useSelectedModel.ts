@@ -12,9 +12,9 @@ import {
 const useSelectedModel = () => {
     const selectedModel = useModelStore((state) => state.selectedModel);
     const setSelectedModel = useModelStore((state) => state.setSelectedModel);
-    const [isUnloading, setIsUnloading] = useState(false);
+    const [isUnloading, setIsUnloading] = useState<boolean>(false);
 
-    const onUnloadModel = async () => {
+    const onUnloadModel = async (): Promise<void> => {
         if (!chatProvider.capabilities.canManageModels) return;
         if (isUnloading || !selectedModel.instanceId) return;
 
