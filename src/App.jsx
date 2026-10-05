@@ -1,6 +1,7 @@
-import { Card, Layout, Space, Tag, Typography } from "antd";
+import { Button, Card, Layout, Space, Tag, Typography } from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
 import ModelList from "./component/ModelList";
-import { useModelStore } from "./store/modelStore";
+import useSelectedModel from "./component/useSelectedModel";
 import Chat from "./component/Chat";
 import "./App.css";
 
@@ -8,7 +9,7 @@ const { Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
 
 function App() {
-    const selectedModel = useModelStore((state) => state.selectedModel);
+    const { selectedModel, isUnloading, onUnloadModel } = useSelectedModel();
     const hasSelectedModel = Boolean(selectedModel.instanceId);
 
     return (
@@ -44,12 +45,27 @@ function App() {
                                     Modelo seleccionado
                                 </Text>
 
-                                <Tag
-                                    color={hasSelectedModel ? "green" : "default"}
-                                    className="app-selected-tag app-fit-content"
-                                >
-                                    {selectedModel.displayName || "No hay modelo elegido"}
-                                </Tag>
+                                <Space align="center" wrap>
+                                    <Tag
+                                        color={hasSelectedModel ? "green" : "default"}
+                                        className="app-selected-tag app-fit-content"
+                                    >
+                                        {selectedModel.displayName || "No hay modelo elegido"}
+                                    </Tag>
+
+                                    {hasSelectedModel && (
+                                        <Button
+                                            danger
+                                            size="small"
+                                            icon={<DownloadOutlined />}
+                                            loading={isUnloading}
+                                            disabled={isUnloading}
+                                            onClick={onUnloadModel}
+                                        >
+                                            Desmontar
+                                        </Button>
+                                    )}
+                                </Space>
 
                             </Space>
                         </Card>

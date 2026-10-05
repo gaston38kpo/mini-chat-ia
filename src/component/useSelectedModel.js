@@ -1,0 +1,42 @@
+import { useState } from "react";
+import { message } from "antd";
+import { unloadModel } from "../service/service";
+import { useModelStore } from "../store/modelStore";
+import { EMPTY_SELECTED_MODEL } from "../constants/appConstants";
+import {
+    getUnloadingModelMessage,
+    getUnloadedModelMessage,
+    getUnloadModelErrorMessage
+} from "../helper/toastMessages";
+
+const useSelectedModel = () => {
+    const selectedModel = useModelStore((state) => state.selectedModel);
+    const setSelectedModel = useModelStore((state) => state.setSelectedModel);
+    const [isUnloading, setIsUnloading] = useState(false);
+
+    const onUnloadModel = async () => {
+        if (isUnloading || !selectedModel.instanceId) return;
+
+        setIsUnloading(true);
+
+        try {
+            message.info(getUnloadingModelMessage(selectedModel.displayName));
+            await unloadModel(selectedModel.instanceId);
+            message.success(getUnloadedModelMessage(selectedModel.displayName));
+            setSelectedModel(EMPTY_SELECTED_MODEL);
+        } catch (error) {
+            console.error("Error unloading model", error);
+            message.error(getUnloadModelErrorMessage(selectedModel.displayName));
+        } finally {
+            setIsUnloading(false);
+        }
+    };
+
+    return {
+        selectedModel,
+        isUnloading,
+        onUnloadModel
+    };
+};
+
+export default useSelectedModel;

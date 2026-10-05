@@ -16,7 +16,7 @@ const getModelsList = async () => {
 };
 
 /**
- * Carga una instancia de modelo y la adapta al dominio interno.
+ * Monta una instancia de modelo y la adapta al dominio interno.
  */
 const loadModel = async (modelKey) => {
     const requestBody = { model: modelKey };
@@ -31,7 +31,7 @@ const loadModel = async (modelKey) => {
 };
 
 /**
- * Descarga una instancia de modelo activa.
+ * Desmonta una instancia de modelo activa.
  */
 const unloadModel = async (instanceId) => {
     const requestBody = { instance_id: instanceId };
@@ -44,7 +44,7 @@ const unloadModel = async (instanceId) => {
 };
 
 /**
- * Envía un mensaje al modelo cargado y notifica cada token recibido.
+ * Envía un mensaje al modelo montado y notifica cada token recibido.
  * Devuelve el response_id final para mantener el contexto de la conversación.
  */
 const sendMessage = async (instanceId, model, input, onToken) => {

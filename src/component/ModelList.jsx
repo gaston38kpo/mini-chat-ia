@@ -44,7 +44,7 @@ const ModelList = () => {
                                 size="small"
                                 onClick={() => onClickModel(model.key, model.displayName)}
                             >
-                                {loadingKey === model.key ? "Cargando..." : "Cargar"}
+                                {loadingKey === model.key ? "Montando..." : "Montar"}
                             </Button>
 
                         </Flex>
