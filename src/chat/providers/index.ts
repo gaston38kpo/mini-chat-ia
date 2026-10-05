@@ -1,8 +1,11 @@
 import { createLmStudioProvider } from "./lmStudioProvider";
 import { createOpenAiCompatibleProvider } from "./openAiCompatibleProvider";
 import { API_KEY, DEFAULT_API_BASE_URL, PROVIDER_ID } from "../../constants/appConstants";
+import type { ChatProvider } from "./chatProvider.contract";
 
-const PROVIDERS = {
+type ProviderFactory = (config: { baseUrl: string; apiKey?: string }) => ChatProvider;
+
+const PROVIDERS: Record<string, ProviderFactory> = {
     lmstudio: createLmStudioProvider,
     "openai-compatible": createOpenAiCompatibleProvider
 };

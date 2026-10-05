@@ -1,13 +1,26 @@
-import { createParser } from "eventsource-parser";
+import { createParser, type EventSourceMessage } from "eventsource-parser";
 import { CONTENT_TYPE_JSON, DEFAULT_API_BASE_URL } from "../constants/appConstants";
 
-const headers = { "Content-Type": CONTENT_TYPE_JSON };
+const headers: Record<string, string> = { "Content-Type": CONTENT_TYPE_JSON };
+
+interface ApiRequestErrorDetails {
+    status?: number;
+    operation?: string;
+    path?: string;
+    body?: string;
+    cause?: unknown;
+}
 
 /**
  * Error enriquecido para fallos de red o respuestas no exitosas de la API.
  */
 class ApiRequestError extends Error {
-    constructor(message, details = {}) {
+    declare status?: number;
+    declare operation?: string;
+    declare path?: string;
+    declare body?: string;
+
+    constructor(message: string, details: ApiRequestErrorDetails = {}) {
         super(message);
         this.name = "ApiRequestError";
         this.status = details.status;
@@ -21,8 +34,13 @@ class ApiRequestError extends Error {
 /**
  * Ejecuta el fetch contra la API configurada y normaliza errores.
  */
-const fetchResponse = async (baseUrl, path, options, operation) => {
-    let response;
+const fetchResponse = async (
+    baseUrl: string,
+    path: string,
+    options: RequestInit | undefined,
+    operation: string
+): Promise<Response> => {
+    let response: Response;
 
     try {
         response = await fetch(`${baseUrl}${path}`, options);
@@ -53,19 +71,30 @@ const fetchResponse = async (baseUrl, path, options, operation) => {
 /**
  * Ejecuta requests HTTP a la API configurada y devuelve el JSON.
  */
-const request = async (path, options = {}, operation = "request", baseUrl = DEFAULT_API_BASE_URL) => {
+const request = async <T = unknown>(
+    path: string,
+    options: RequestInit = {},
+    operation = "request",
+    baseUrl: string = DEFAULT_API_BASE_URL
+): Promise<T> => {
     const response = await fetchResponse(baseUrl, path, options, operation);
 
-    return response.json();
+    return response.json() as Promise<T>;
 };
 
 /**
  * Ejecuta un request en streaming (SSE) e invoca onMessage con cada mensaje crudo recibido.
  * El parseo del payload queda a cargo de cada provider.
  */
-const requestStream = async (path, options, operation, onMessage, baseUrl = DEFAULT_API_BASE_URL) => {
+const requestStream = async (
+    path: string,
+    options: RequestInit | undefined,
+    operation: string,
+    onMessage: (message: EventSourceMessage) => void,
+    baseUrl: string = DEFAULT_API_BASE_URL
+): Promise<void> => {
     const response = await fetchResponse(baseUrl, path, options, operation);
-    const reader = response.body.getReader();
+    const reader = response.body!.getReader();
     const decoder = new TextDecoder();
 
     const parser = createParser({

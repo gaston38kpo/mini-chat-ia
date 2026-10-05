@@ -6,7 +6,14 @@ const API_KEY = import.meta.env.VITE_API_KEY ?? "";
 
 const CONTENT_TYPE_JSON = "application/json";
 
-const EMPTY_SELECTED_MODEL = {
+interface SelectedModel {
+    displayName: string;
+    instanceId: string;
+    key: string;
+    lastResponseId: string | null;
+}
+
+const EMPTY_SELECTED_MODEL: SelectedModel = {
     displayName: "",
     instanceId: "",
     key: "",
@@ -26,3 +33,4 @@ export {
     EMPTY_SELECTED_MODEL,
     TOAST_MESSAGES
 };
+export type { SelectedModel };

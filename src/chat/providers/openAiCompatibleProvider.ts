@@ -1,4 +1,6 @@
 import { headers, request, requestStream } from "../../helper/serviceHelper";
+import type { EventSourceMessage } from "eventsource-parser";
+import type { ChatMessage, ChatModel, ChatProvider, StreamMessageParams } from "./chatProvider.contract";
 
 const API_PATHS = {
     MODELS: "/models",
@@ -12,8 +14,27 @@ const API_OPERATIONS = {
 
 const MODEL_MANAGEMENT_ERROR = "OpenAI-compatible provider does not support model management";
 
-const normalizeModels = (response) => {
-    const sourceModels = Array.isArray(response?.data) ? response.data : [];
+interface OpenAiModelPayload {
+    id: string;
+}
+
+interface OpenAiModelsResponse {
+    data?: OpenAiModelPayload[];
+}
+
+interface OpenAiChatRequestBody {
+    model: string;
+    messages: Array<{ role: "user" | "assistant"; content: string }>;
+    stream: boolean;
+}
+
+interface OpenAiStreamChunk {
+    choices?: Array<{ delta?: { content?: string } }>;
+}
+
+const normalizeModels = (response: unknown): ChatModel[] => {
+    const payload = response as OpenAiModelsResponse | null | undefined;
+    const sourceModels = payload && Array.isArray(payload.data) ? payload.data : [];
 
     return sourceModels.map((model) => ({
         key: model.id,
@@ -22,7 +43,7 @@ const normalizeModels = (response) => {
     }));
 };
 
-const buildHeaders = (apiKey) => {
+const buildHeaders = (apiKey: string): Record<string, string> => {
     if (!apiKey) return headers;
 
     return {
@@ -31,7 +52,7 @@ const buildHeaders = (apiKey) => {
     };
 };
 
-const toApiMessages = (messages) => {
+const toApiMessages = (messages: ChatMessage[]): Array<{ role: "user" | "assistant"; content: string }> => {
     return messages.map(({ role, content }) => ({ role, content }));
 };
 
@@ -39,11 +60,11 @@ const toApiMessages = (messages) => {
  * Crea un ChatProvider compatible con la API de OpenAI (endpoint /chat/completions).
  * No gestiona carga/descarga de modelos: el modelo se elige directo por su id.
  */
-const createOpenAiCompatibleProvider = ({ baseUrl, apiKey = "" }) => {
+const createOpenAiCompatibleProvider = ({ baseUrl, apiKey = "" }: { baseUrl: string; apiKey?: string }): ChatProvider => {
     /**
      * Obtiene la lista de modelos y la normaliza al dominio interno.
      */
-    const listModels = async () => {
+    const listModels = async (): Promise<ChatModel[]> => {
         const response = await request(
             API_PATHS.MODELS,
             { headers: buildHeaders(apiKey) },
@@ -57,14 +78,14 @@ const createOpenAiCompatibleProvider = ({ baseUrl, apiKey = "" }) => {
     /**
      * No soportado: el proveedor no administra instancias de modelo.
      */
-    const loadModel = async () => {
+    const loadModel = async (): Promise<{ instanceId: string }> => {
         throw new Error(MODEL_MANAGEMENT_ERROR);
     };
 
     /**
      * No soportado: el proveedor no administra instancias de modelo.
      */
-    const unloadModel = async () => {
+    const unloadModel = async (): Promise<void> => {
         throw new Error(MODEL_MANAGEMENT_ERROR);
     };
 
@@ -72,8 +93,8 @@ const createOpenAiCompatibleProvider = ({ baseUrl, apiKey = "" }) => {
      * Envía un mensaje al modelo y notifica cada token recibido vía SSE.
      * El estado de la conversación se reconstruye en cada request con el historial completo.
      */
-    const streamMessage = async ({ model, input, messages, onToken }) => {
-        const requestBody = {
+    const streamMessage = async ({ model, input, messages, onToken }: StreamMessageParams): Promise<{ conversationId: string | null }> => {
+        const requestBody: OpenAiChatRequestBody = {
             model,
             messages: [...toApiMessages(messages), { role: "user", content: input }],
             stream: true
@@ -83,10 +104,10 @@ const createOpenAiCompatibleProvider = ({ baseUrl, apiKey = "" }) => {
             method: "POST",
             headers: buildHeaders(apiKey),
             body: JSON.stringify(requestBody)
-        }, API_OPERATIONS.SEND_MESSAGE, (message) => {
+        }, API_OPERATIONS.SEND_MESSAGE, (message: EventSourceMessage) => {
             if (message.data === "[DONE]") return;
 
-            const chunk = JSON.parse(message.data);
+            const chunk = JSON.parse(message.data) as OpenAiStreamChunk;
             const token = chunk.choices?.[0]?.delta?.content;
 
             if (token) {
