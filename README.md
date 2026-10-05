@@ -39,6 +39,11 @@ Crea un `.env` en la raiz. Todas son opcionales:
 Define `VITE_PROVIDER` con la clave del provider. Para crear uno nuevo, segui
 la guia: [`docs/providers.md`](docs/providers.md).
 
+## Usar como plantilla
+
+Este repo es una base reutilizable. El checklist para clonarlo y personalizarlo
+esta en [`docs/plantilla.md`](docs/plantilla.md).
+
 ## Estructura
 
 | Carpeta | Contenido |
@@ -53,3 +58,4 @@ la guia: [`docs/providers.md`](docs/providers.md).
 
 - [`docs/arquitectura.md`](docs/arquitectura.md) -- capas, flujo y estado.
 - [`docs/providers.md`](docs/providers.md) -- como agregar un provider.
+- [`docs/plantilla.md`](docs/plantilla.md) -- usar el repo como base.
