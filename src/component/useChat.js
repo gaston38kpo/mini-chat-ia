@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { message } from "antd";
-import { sendMessage } from "../service/service";
+import { chatProvider } from "../chat/providers";
 import { createAssistantMessage, createUserMessage } from "../helper/chatHelper";
 import { TOAST_MESSAGES } from "../helper/toastMessages";
 
@@ -35,19 +35,20 @@ const useChat = ({ selectedModel, setLastResponseId }) => {
         ]);
 
         try {
-            const responseId = await sendMessage(
-                selectedModel.lastResponseId,
-                selectedModel.key,
-                text,
-                (token) => setMessages((prev) => prev.map((item) => (
+            const { conversationId } = await chatProvider.streamMessage({
+                model: selectedModel.key,
+                input: text,
+                messages,
+                conversationId: selectedModel.lastResponseId,
+                onToken: (token) => setMessages((prev) => prev.map((item) => (
                     item.id === assistantMessage.id
                         ? { ...item, content: item.content + token }
                         : item
                 )))
-            );
+            });
 
-            if (responseId) {
-                setLastResponseId(responseId);
+            if (conversationId) {
+                setLastResponseId(conversationId);
             }
         } catch (error) {
             console.error("Error sending chat message", error);

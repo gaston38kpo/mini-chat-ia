@@ -1,8 +1,6 @@
 import { createParser } from "eventsource-parser";
 import { CONTENT_TYPE_JSON, DEFAULT_API_BASE_URL } from "../constants/appConstants";
 
-const BASE_URL = DEFAULT_API_BASE_URL;
-
 const headers = { "Content-Type": CONTENT_TYPE_JSON };
 
 /**
@@ -23,11 +21,11 @@ class ApiRequestError extends Error {
 /**
  * Ejecuta el fetch contra la API configurada y normaliza errores.
  */
-const fetchResponse = async (path, options, operation) => {
+const fetchResponse = async (baseUrl, path, options, operation) => {
     let response;
 
     try {
-        response = await fetch(`${BASE_URL}${path}`, options);
+        response = await fetch(`${baseUrl}${path}`, options);
     } catch (error) {
         console.error(`${operation} network error`, error);
         throw new ApiRequestError(`${operation} network error`, {
@@ -55,24 +53,23 @@ const fetchResponse = async (path, options, operation) => {
 /**
  * Ejecuta requests HTTP a la API configurada y devuelve el JSON.
  */
-const request = async (path, options = {}, operation = "request") => {
-    const response = await fetchResponse(path, options, operation);
+const request = async (path, options = {}, operation = "request", baseUrl = DEFAULT_API_BASE_URL) => {
+    const response = await fetchResponse(baseUrl, path, options, operation);
 
     return response.json();
 };
 
 /**
- * Ejecuta un request en streaming (SSE) e invoca onEvent por cada evento recibido.
+ * Ejecuta un request en streaming (SSE) e invoca onMessage con cada mensaje crudo recibido.
+ * El parseo del payload queda a cargo de cada provider.
  */
-const requestStream = async (path, options, operation, onEvent) => {
-    const response = await fetchResponse(path, options, operation);
+const requestStream = async (path, options, operation, onMessage, baseUrl = DEFAULT_API_BASE_URL) => {
+    const response = await fetchResponse(baseUrl, path, options, operation);
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
 
     const parser = createParser({
-        onEvent: (message) => {
-            onEvent(JSON.parse(message.data));
-        },
+        onEvent: onMessage,
         onError: (error) => {
             console.error(`${operation} stream parse error`, error);
         }

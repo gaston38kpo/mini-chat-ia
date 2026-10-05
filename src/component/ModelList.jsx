@@ -7,8 +7,13 @@ const { Title } = Typography;
 
 const ModelList = () => {
     const setSelectedModel = useModelStore((state) => state.setSelectedModel);
-    const { models, loadingKey, onClickModel } = useModelList({ setSelectedModel });
-    const isLoading = loadingKey !== null;
+    const { models, loadingKey, canManageModels, onClickModel } = useModelList({ setSelectedModel });
+    const isLoading = canManageModels && loadingKey !== null;
+    const getActionLabel = (key) => {
+        if (!canManageModels) return "Elegir";
+
+        return loadingKey === key ? "Montando..." : "Montar";
+    };
 
     return (
         <Flex vertical gap={16}>
@@ -38,13 +43,13 @@ const ModelList = () => {
                             </span>
 
                             <Button
-                                type={loadingKey === model.key ? "dashed" : "primary"}
-                                loading={loadingKey === model.key}
+                                type={canManageModels && loadingKey === model.key ? "dashed" : "primary"}
+                                loading={canManageModels && loadingKey === model.key}
                                 disabled={isLoading}
                                 size="small"
                                 onClick={() => onClickModel(model.key, model.displayName)}
                             >
-                                {loadingKey === model.key ? "Montando..." : "Montar"}
+                                {getActionLabel(model.key)}
                             </Button>
 
                         </Flex>

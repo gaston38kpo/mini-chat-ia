@@ -3,6 +3,8 @@ import { DownloadOutlined } from "@ant-design/icons";
 import ModelList from "./component/ModelList";
 import useSelectedModel from "./component/useSelectedModel";
 import Chat from "./component/Chat";
+import { chatProvider } from "./chat/providers";
+import { APP_CONFIG } from "./constants/appConfig";
 import "./App.css";
 
 const { Content } = Layout;
@@ -10,7 +12,8 @@ const { Title, Paragraph, Text } = Typography;
 
 function App() {
     const { selectedModel, isUnloading, onUnloadModel } = useSelectedModel();
-    const hasSelectedModel = Boolean(selectedModel.instanceId);
+    const hasSelectedModel = Boolean(selectedModel.key);
+    const canManageModels = chatProvider.capabilities.canManageModels;
 
     return (
         <Layout className="app-layout">
@@ -21,20 +24,20 @@ function App() {
                         <header>
                             <Space direction="vertical" size="small" className="app-stack">
 
-                                <Tag color="blue" className="app-fit-content">Mini Chat</Tag>
+                                <Tag color="blue" className="app-fit-content">{APP_CONFIG.name}</Tag>
 
                                 <Title level={2} className="app-title">
-                                    Mini Chat IA para API de LM Studio
+                                    {APP_CONFIG.title}
                                 </Title>
 
                                 <Paragraph type="secondary" className="app-paragraph">
-                                    Selecciona un modelo para chatear.
+                                    {APP_CONFIG.tagline}
                                 </Paragraph>
 
                             </Space>
                         </header>
 
-                        <Card type="inner" title="Modelos disponibles en LM Studio">
+                        <Card type="inner" title={APP_CONFIG.modelsSectionTitle}>
                             <ModelList />
                         </Card>
 
@@ -53,7 +56,7 @@ function App() {
                                         {selectedModel.displayName || "No hay modelo elegido"}
                                     </Tag>
 
-                                    {hasSelectedModel && (
+                                    {hasSelectedModel && canManageModels && (
                                         <Button
                                             danger
                                             size="small"

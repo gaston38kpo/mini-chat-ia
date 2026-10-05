@@ -1,20 +1,10 @@
 const DEFAULT_API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://192.168.1.68:1234/api/v1";
 
+const PROVIDER_ID = import.meta.env.VITE_PROVIDER ?? "lmstudio";
+
+const API_KEY = import.meta.env.VITE_API_KEY ?? "";
+
 const CONTENT_TYPE_JSON = "application/json";
-
-const API_PATHS = {
-    MODELS: "/models",
-    MODELS_LOAD: "/models/load",
-    MODELS_UNLOAD: "/models/unload",
-    CHAT: "/chat"
-};
-
-const API_OPERATIONS = {
-    GET_MODELS_LIST: "getModelsList",
-    LOAD_MODEL: "loadModel",
-    UNLOAD_MODEL: "unloadModel",
-    SEND_MESSAGE: "sendMessage"
-};
 
 const EMPTY_SELECTED_MODEL = {
     displayName: "",
@@ -30,9 +20,9 @@ const TOAST_MESSAGES = {
 
 export {
     DEFAULT_API_BASE_URL,
+    PROVIDER_ID,
+    API_KEY,
     CONTENT_TYPE_JSON,
-    API_PATHS,
-    API_OPERATIONS,
     EMPTY_SELECTED_MODEL,
     TOAST_MESSAGES
 };

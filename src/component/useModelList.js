@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { message } from "antd";
-import { getModelsList, loadModel, unloadModel } from "../service/service";
-import { getLoadedInstanceIds, normalizeModels } from "../helper/modelHelper";
+import { chatProvider } from "../chat/providers";
+import { getLoadedInstanceIds } from "../helper/modelHelper";
 import {
     TOAST_MESSAGES,
     getLoadedModelMessage,
@@ -12,10 +12,10 @@ import {
 const useModelList = ({ setSelectedModel }) => {
     const [models, setModels] = useState([]);
     const [loadingKey, setLoadingKey] = useState(null);
+    const canManageModels = chatProvider.capabilities.canManageModels;
 
     const refreshModels = async () => {
-        const response = await getModelsList();
-        const modelsList = normalizeModels(response);
+        const modelsList = await chatProvider.listModels();
 
         setModels(modelsList);
         return modelsList;
@@ -28,20 +28,25 @@ const useModelList = ({ setSelectedModel }) => {
         if (!loadedInstanceIds.length) return;
 
         await Promise.all(
-            loadedInstanceIds.map((instanceId) => unloadModel(instanceId))
+            loadedInstanceIds.map((instanceId) => chatProvider.unloadModel(instanceId))
         );
 
         await refreshModels();
     };
 
     const onClickModel = async (key, displayName) => {
+        if (!canManageModels) {
+            setSelectedModel({ displayName, instanceId: "", key });
+            return;
+        }
+
         setLoadingKey(key);
 
         try {
             message.info(getLoadingModelMessage(displayName));
             await unloadAllLoadedInstances();
 
-            const { instanceId } = await loadModel(key);
+            const { instanceId } = await chatProvider.loadModel(key);
             message.success(getLoadedModelMessage(displayName));
             setSelectedModel({ displayName, instanceId, key });
         } catch (error) {
@@ -66,6 +71,7 @@ const useModelList = ({ setSelectedModel }) => {
     return {
         models,
         loadingKey,
+        canManageModels,
         onClickModel
     };
 };

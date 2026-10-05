@@ -12,6 +12,7 @@ const createUserMessage = (content) => ({
 
 const createAssistantMessage = (modelName = "") => ({
     id: createMessageId(),
+    role: "assistant",
     content: "",
     modelName
 });

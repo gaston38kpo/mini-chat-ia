@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { message } from "antd";
-import { unloadModel } from "../service/service";
+import { chatProvider } from "../chat/providers";
 import { useModelStore } from "../store/modelStore";
 import { EMPTY_SELECTED_MODEL } from "../constants/appConstants";
 import {
@@ -15,13 +15,14 @@ const useSelectedModel = () => {
     const [isUnloading, setIsUnloading] = useState(false);
 
     const onUnloadModel = async () => {
+        if (!chatProvider.capabilities.canManageModels) return;
         if (isUnloading || !selectedModel.instanceId) return;
 
         setIsUnloading(true);
 
         try {
             message.info(getUnloadingModelMessage(selectedModel.displayName));
-            await unloadModel(selectedModel.instanceId);
+            await chatProvider.unloadModel(selectedModel.instanceId);
             message.success(getUnloadedModelMessage(selectedModel.displayName));
             setSelectedModel(EMPTY_SELECTED_MODEL);
         } catch (error) {
