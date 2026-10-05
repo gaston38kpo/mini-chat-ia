@@ -1,3 +1,4 @@
+import { createParser } from "eventsource-parser";
 import { CONTENT_TYPE_JSON, DEFAULT_API_BASE_URL } from "../constants/appConstants";
 
 const BASE_URL = DEFAULT_API_BASE_URL;
@@ -67,23 +68,22 @@ const requestStream = async (path, options, operation, onEvent) => {
     const response = await fetchResponse(path, options, operation);
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    let buffer = "";
+
+    const parser = createParser({
+        onEvent: (message) => {
+            onEvent(JSON.parse(message.data));
+        },
+        onError: (error) => {
+            console.error(`${operation} stream parse error`, error);
+        }
+    });
 
     for (;;) {
         const { done, value } = await reader.read();
 
         if (done) break;
 
-        buffer += decoder.decode(value, { stream: true });
-
-        const lines = buffer.split("\n");
-        buffer = lines.pop();
-
-        for (const line of lines) {
-            if (!line.startsWith("data:")) continue;
-
-            onEvent(JSON.parse(line.slice(5).trim()));
-        }
+        parser.feed(decoder.decode(value, { stream: true }));
     }
 };
 
