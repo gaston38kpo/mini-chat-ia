@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { message } from "antd";
+import { notify } from "../helper/toast";
 import useChatProvider from "./useChatProvider";
 import { useModelStore } from "../store/modelStore";
 import { EMPTY_SELECTED_MODEL } from "../constants/appConstants";
@@ -22,13 +22,13 @@ const useSelectedModel = () => {
         setIsUnloading(true);
 
         try {
-            message.info(getUnloadingModelMessage(selectedModel.displayName));
+            notify(getUnloadingModelMessage(selectedModel.displayName), "info");
             await provider.unloadModel(selectedModel.instanceId);
-            message.success(getUnloadedModelMessage(selectedModel.displayName));
+            notify(getUnloadedModelMessage(selectedModel.displayName), "success");
             setSelectedModel(EMPTY_SELECTED_MODEL);
         } catch (error) {
             console.error("Error unloading model", error);
-            message.error(getUnloadModelErrorMessage(selectedModel.displayName));
+            notify(getUnloadModelErrorMessage(selectedModel.displayName), "error");
         } finally {
             setIsUnloading(false);
         }

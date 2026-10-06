@@ -52,12 +52,12 @@ Chain strategy: stacked-to-main
 
 ## Phase 4: S4 Chronicle, Composer & Toast [app + vendored]
 
-- [ ] 4.1 Create `src/helper/toast.ts` (`notify`) + `src/components/ui/sonner.tsx` `<Toaster />`; mount once
-- [ ] 4.2 `ChroniclePanel.tsx`: `scroll-area` log `role="log"`+`aria-live="polite"`; composer sends on Enter, disabled while sending
-- [ ] 4.3 Swap `message.*` → `notify()` in `src/component/{useChat,useModelList,useSelectedModel}.ts` (call-only)
-- [ ] 4.4 Remove `src/component/Chat.tsx`; delete `src/component/Chat.css`
-- [ ] 4.5 Manual: send failure → toast; live region intact
-- [ ] 4.6 Exit check: trio green
+- [x] 4.1 Create `src/helper/toast.ts` (`notify`) + `src/components/ui/sonner.tsx` `<Toaster />`; mount once
+- [x] 4.2 `ChroniclePanel.tsx`: `scroll-area` log `role="log"`+`aria-live="polite"`; composer sends on Enter, disabled while sending
+- [x] 4.3 Swap `message.*` → `notify()` in `src/component/{useChat,useModelList,useSelectedModel}.ts` (call-only)
+- [x] 4.4 Remove `src/component/Chat.tsx`; delete `src/component/Chat.css`
+- [x] 4.5 Manual: send failure → toast; live region intact
+- [x] 4.6 Exit check: trio green
 
 ## Phase 5: S5 Delete antd [config]
 

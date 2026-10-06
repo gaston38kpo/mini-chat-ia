@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { message } from "antd";
+import { notify } from "../helper/toast";
 import useChatProvider from "./useChatProvider";
 import { useModelStore } from "../store/modelStore";
 import { getLoadedInstanceIds } from "../helper/modelHelper";
@@ -68,17 +68,17 @@ const useModelList = ({ setSelectedModel }: UseModelListParams) => {
         setLoadingKey(key);
 
         try {
-            message.info(getLoadingModelMessage(displayName));
+            notify(getLoadingModelMessage(displayName), "info");
             const trackedInstanceId = useModelStore.getState().selectedModel.instanceId;
 
             await unloadInstances(trackedInstanceId || undefined);
 
             const { instanceId } = await provider.loadModel(key);
-            message.success(getLoadedModelMessage(displayName));
+            notify(getLoadedModelMessage(displayName), "success");
             setSelectedModel({ displayName, instanceId, key });
         } catch (error) {
             console.error("Error loading model", error);
-            message.error(getLoadModelErrorMessage(displayName));
+            notify(getLoadModelErrorMessage(displayName), "error");
         } finally {
             setLoadingKey(null);
         }
@@ -94,7 +94,7 @@ const useModelList = ({ setSelectedModel }: UseModelListParams) => {
 
         refreshModels().catch((error) => {
             console.error("Error fetching model list", error);
-            message.error(TOAST_MESSAGES.MODELS_FETCH_ERROR);
+            notify(TOAST_MESSAGES.MODELS_FETCH_ERROR, "error");
         });
 
         return () => {

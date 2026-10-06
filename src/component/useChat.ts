@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type React from "react";
-import { message } from "antd";
+import { notify } from "../helper/toast";
 import useChatProvider from "./useChatProvider";
 import { createAssistantMessage, createUserMessage } from "../helper/chatHelper";
 import { TOAST_MESSAGES } from "../helper/toastMessages";
@@ -24,7 +24,7 @@ const useChat = ({ selectedModel, setLastResponseId }: UseChatParams) => {
         if (isSending) return;
 
         if (!provider || !selectedModel?.key) {
-            message.error(TOAST_MESSAGES.CHAT_SEND_ERROR);
+            notify(TOAST_MESSAGES.CHAT_SEND_ERROR, "error");
             return;
         }
 
@@ -61,7 +61,7 @@ const useChat = ({ selectedModel, setLastResponseId }: UseChatParams) => {
             }
         } catch (error) {
             console.error("Error sending chat message", error);
-            message.error(TOAST_MESSAGES.CHAT_SEND_ERROR);
+            notify(TOAST_MESSAGES.CHAT_SEND_ERROR, "error");
             setCurrentMessage(text);
             setMessages((prev) => prev.filter((item) => item.id !== assistantMessage.id));
         } finally {

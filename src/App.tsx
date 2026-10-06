@@ -17,9 +17,9 @@ function App() {
     const appConfig = getAppConfig(providerLabel);
     const canManageModels = provider?.capabilities.canManageModels ?? false;
 
-    // Lifted from Chat.tsx so the status strip can read the message count and the
-    // sending flag. Chat.tsx stays the renderer for this slice and receives this
-    // state as props through ChroniclePanel.
+    // Lifted from the former Chat.tsx so the status strip can read the message
+    // count and the sending flag. The chat state flows as props into
+    // ChroniclePanel and StatusStrip.
     const {
         messages,
         currentMessage,
