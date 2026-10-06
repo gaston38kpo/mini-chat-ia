@@ -1,10 +1,11 @@
 # Agregar un provider de chat
 
-Agregar un backend nuevo = **un archivo + una linea en el registro**.
+Agregar un backend nuevo es **un archivo, una entrada en el registro y una opcion
+en el selector**.
 
 El resto de la app (hooks incluidos) ya esta escrito contra la interfaz
-`ChatProvider`, asi que no deberias tocar nada mas. Si tuviste que tocar un
-hook o un componente, la costura se rompio.
+`ChatProvider`, asi que no deberias tocar nada mas. Si tuviste que tocar un hook,
+la costura se rompio.
 
 ## La interfaz
 
@@ -26,9 +27,12 @@ export interface ChatProvider {
 
 1. Crea `src/chat/providers/<nombre>Provider.ts`.
 2. Exporta `create<Nombre>Provider({ baseUrl, apiKey })` que devuelva un `ChatProvider`.
-3. Registralo en el mapa `PROVIDERS` de `src/chat/providers/index.ts`.
-4. Declara `capabilities.canManageModels` (ver abajo).
-5. Define `VITE_PROVIDER=<clave>` en tu `.env`.
+3. Suma el `kind` a la union `ProviderKind` de `src/chat/providers/index.ts`.
+4. Registra la factory en el mapa `PROVIDERS` (`Record<ProviderKind, ProviderFactory>`).
+5. Agrega una opcion en `KIND_OPTIONS` de `src/component/ProviderSelector.tsx`.
+6. Declara `capabilities.canManageModels` (ver abajo).
+7. Elige el proveedor en la UI. Para que arranque activo por defecto, define
+   `VITE_PROVIDER=<kind>` en tu `.env`.
 
 ## Esqueleto minimo
 
@@ -112,16 +116,31 @@ const createMiProvider = ({
 
 ## Registro
 
-En `src/chat/providers/index.ts`, suma tu factory al mapa y usa la misma clave
-en `VITE_PROVIDER`:
+En `src/chat/providers/index.ts`, suma el `kind` a la union y la factory al mapa:
 
 ```ts
-const PROVIDERS: Record<string, ProviderFactory> = {
-    lmstudio: createLmStudioProvider,
+export type ProviderKind = "lmstudio" | "openai-compatible" | "miprovider";
+
+const PROVIDERS: Record<ProviderKind, ProviderFactory> = {
+    "lmstudio": createLmStudioProvider,
     "openai-compatible": createOpenAiCompatibleProvider,
-    miprovider: createMiProvider // <- nueva linea
+    "miprovider": createMiProvider // <- nueva linea
 };
 ```
+
+`createProvider(kind, config)` construye el `ChatProvider` que corresponda. No
+existe un singleton: `useChatProvider` toma el proveedor activo del store y llama
+a la factory.
+
+## Como se elige el provider
+
+| Paso | Detalle |
+| --- | --- |
+| Alta y edicion | Desde `ProviderSelector.tsx` (nombre, tipo, `baseUrl`, `apiKey`). |
+| Seleccion | `setActiveProvider(id)` en el selector. |
+| Persistencia | `providerStore` (`src/store/providerStore.ts`) con `persist`, clave `mini-chat-ia/providers`. |
+| Resolucion | `useChatProvider` busca el activo y memoiza `createProvider(kind, { baseUrl, apiKey })`. |
+| Semilla | `VITE_PROVIDER` decide cual proveedor sembrado arranca activo; no es la unica forma de elegir. |
 
 ## Regla de capabilities
 
@@ -130,8 +149,9 @@ const PROVIDERS: Record<string, ProviderFactory> = {
 | `true` | Muestra "Montar", desmonta al montar otro modelo y ofrece "Desmontar". |
 | `false` | Muestra "Elegir" y no toca modelos. |
 
-**No hay que tocar la UI.** `useModelList`, `useSelectedModel` y `App` ya leen
-`chatProvider.capabilities.canManageModels`.
+**No hay que tocar los hooks por esto.** `useModelList`, `useSelectedModel` y
+`RosterPanel` ya leen `provider.capabilities.canManageModels` (via
+`useChatProvider`).
 
 ## Providers sin estado (stateless)
 
@@ -151,7 +171,8 @@ usuario.
 - [ ] `npm run lint`
 - [ ] `npm run typecheck`
 - [ ] `npm run build`
-- [ ] No toque ningun hook ni componente (si lo hice, la costura se rompio).
+- [ ] El `kind` figura en `ProviderKind`, en `PROVIDERS` y en `KIND_OPTIONS`.
+- [ ] No toque ningun hook (si lo hice, la costura se rompio).
 
 ## Siguiente paso
 
