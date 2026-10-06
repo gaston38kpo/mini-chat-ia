@@ -1,23 +1,35 @@
 import { SendOutlined } from "@ant-design/icons";
 import { Button, Flex, Input, Space, Spin, Tag, Typography } from "antd";
 import Markdown from "react-markdown";
-import { useModelStore } from "../store/modelStore";
-import useChat from "./useChat";
+import type React from "react";
+import type { ChatMessage } from "../chat/providers/chatProvider.contract";
+import type { SelectedModel } from "../constants/appConstants";
 import "./Chat.css";
 
 const { Title, Text } = Typography;
 
-const Chat = () => {
-    const selectedModel = useModelStore((state) => state.selectedModel);
-    const setLastResponseId = useModelStore((state) => state.setLastResponseId);
-    const {
-        messages,
-        currentMessage,
-        isSending,
-        onSendMessage,
-        onChangeInputText
-    } = useChat({ selectedModel, setLastResponseId });
+interface ChatProps {
+    selectedModel: SelectedModel;
+    messages: ChatMessage[];
+    currentMessage: string;
+    isSending: boolean;
+    onSendMessage: (event: React.FormEvent<HTMLFormElement>) => void;
+    onChangeInputText: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}
 
+/**
+ * Message log and composer. This slice lifts `useChat` into `App`, so the chat
+ * state arrives as props instead of being read from the hook here. S4 melts this
+ * renderer into `ChroniclePanel`; until then it stays the single chat renderer.
+ */
+const Chat = ({
+    selectedModel,
+    messages,
+    currentMessage,
+    isSending,
+    onSendMessage,
+    onChangeInputText
+}: ChatProps) => {
     return (
         <Flex vertical gap="middle" className="chat-root">
             <Flex justify="space-between" align="center">

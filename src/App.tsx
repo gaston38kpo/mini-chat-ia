@@ -1,92 +1,66 @@
-import { Button, Card, Layout, Space, Tag, Typography } from "antd";
-import { DownloadOutlined } from "@ant-design/icons";
-import ModelList from "./component/ModelList";
-import ProviderSelector from "./component/ProviderSelector";
+import { Toaster } from "./components/ui/sonner";
+import GameShell from "./component/GameShell";
+import HudBanner from "./component/HudBanner";
+import RosterPanel from "./component/RosterPanel";
+import ChroniclePanel from "./component/ChroniclePanel";
+import StatusStrip from "./component/StatusStrip";
+import useChat from "./component/useChat";
 import useChatProvider from "./component/useChatProvider";
 import useSelectedModel from "./component/useSelectedModel";
-import Chat from "./component/Chat";
+import { useModelStore } from "./store/modelStore";
 import { getAppConfig } from "./constants/appConfig";
-import "./App.css";
-
-const { Content } = Layout;
-const { Title, Paragraph, Text } = Typography;
 
 function App() {
     const { provider, providerLabel } = useChatProvider();
     const { selectedModel, isUnloading, onUnloadModel } = useSelectedModel();
+    const setLastResponseId = useModelStore((state) => state.setLastResponseId);
     const appConfig = getAppConfig(providerLabel);
-    const hasSelectedModel = Boolean(selectedModel.key);
     const canManageModels = provider?.capabilities.canManageModels ?? false;
 
+    // Lifted from Chat.tsx so the status strip can read the message count and the
+    // sending flag. Chat.tsx stays the renderer for this slice and receives this
+    // state as props through ChroniclePanel.
+    const {
+        messages,
+        currentMessage,
+        isSending,
+        onSendMessage,
+        onChangeInputText
+    } = useChat({ selectedModel, setLastResponseId });
+
     return (
-        <Layout className="app-layout">
-            <Content className="app-content">
-                <Card bordered={false} className="app-card">
-                    <Space direction="vertical" size="large" className="app-stack">
+        <>
+            <GameShell
+                hud={<HudBanner appConfig={appConfig} providerLabel={providerLabel} />}
+                roster={
+                    <RosterPanel
+                        selectedModel={selectedModel}
+                        canManageModels={canManageModels}
+                        isUnloading={isUnloading}
+                        onUnloadModel={onUnloadModel}
+                    />
+                }
+                chronicle={
+                    <ChroniclePanel
+                        selectedModel={selectedModel}
+                        messages={messages}
+                        currentMessage={currentMessage}
+                        isSending={isSending}
+                        onSendMessage={onSendMessage}
+                        onChangeInputText={onChangeInputText}
+                    />
+                }
+                status={
+                    <StatusStrip
+                        messageCount={messages.length}
+                        connectionLabel={providerLabel}
+                        isSending={isSending}
+                    />
+                }
+            />
 
-                        <header>
-                            <Space direction="vertical" size="small" className="app-stack">
-
-                                <Tag color="blue" className="app-fit-content">{appConfig.name}</Tag>
-
-                                <Title level={2} className="app-title">
-                                    {appConfig.title}
-                                </Title>
-
-                                <Paragraph type="secondary" className="app-paragraph">
-                                    {appConfig.tagline}
-                                </Paragraph>
-
-                                <ProviderSelector />
-
-                            </Space>
-                        </header>
-
-                        <Card type="inner" title={appConfig.modelsSectionTitle}>
-                            <ModelList />
-                        </Card>
-
-                        <Card type="inner">
-                            <Space direction="vertical" size="small" className="app-stack">
-
-                                <Text type="secondary" className="app-selected-label">
-                                    Modelo seleccionado
-                                </Text>
-
-                                <Space align="center" wrap>
-                                    <Tag
-                                        color={hasSelectedModel ? "green" : "default"}
-                                        className="app-selected-tag app-fit-content"
-                                    >
-                                        {selectedModel.displayName || "No hay modelo elegido"}
-                                    </Tag>
-
-                                    {hasSelectedModel && canManageModels && (
-                                        <Button
-                                            danger
-                                            size="small"
-                                            icon={<DownloadOutlined />}
-                                            loading={isUnloading}
-                                            disabled={isUnloading}
-                                            onClick={onUnloadModel}
-                                        >
-                                            Desmontar
-                                        </Button>
-                                    )}
-                                </Space>
-
-                            </Space>
-                        </Card>
-
-                        {hasSelectedModel && (
-                            <Card type="inner" title="Conversacion">
-                                <Chat />
-                            </Card>
-                        )}
-                    </Space>
-                </Card>
-            </Content>
-        </Layout>
+            <Toaster />
+        </>
     );
 }
 

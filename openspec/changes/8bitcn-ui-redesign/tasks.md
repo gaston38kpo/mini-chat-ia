@@ -31,15 +31,15 @@ Chain strategy: stacked-to-main
 
 ## Phase 2: S2 Shell / Layout [app]
 
-- [ ] 2.1 Create `src/component/GameShell.tsx` (`h-dvh` grid; 4 zone nodes)
-- [ ] 2.2 Create `src/component/HudBanner.tsx` (title + `ProviderSelector` + configure)
-- [ ] 2.3 Create `src/component/RosterPanel.tsx` (hosts `ModelList`; `Badge`; gated unmount)
-- [ ] 2.4 Create `src/component/StatusStrip.tsx` (count, connection, `Progress`)
-- [ ] 2.5 Create `src/component/ChroniclePanel.tsx` hosting existing `Chat.tsx`
-- [ ] 2.6 `src/App.tsx`: lift `useChat`, compose zones, mount one `<Toaster />`
-- [ ] 2.7 `index.html`: static single `class="theme-<name>"` on `<html>`
-- [ ] 2.8 Delete `src/App.css`; verify `canManageModels` gating + Enter-to-send
-- [ ] 2.9 Exit check: trio green; zones render at lg/md/<md
+- [x] 2.1 Create `src/component/GameShell.tsx` (`h-dvh` grid; 4 zone nodes)
+- [x] 2.2 Create `src/component/HudBanner.tsx` (title + `ProviderSelector` + configure)
+- [x] 2.3 Create `src/component/RosterPanel.tsx` (hosts `ModelList`; `Badge`; gated unmount)
+- [x] 2.4 Create `src/component/StatusStrip.tsx` (count, connection, `Progress`)
+- [x] 2.5 Create `src/component/ChroniclePanel.tsx` hosting existing `Chat.tsx`
+- [x] 2.6 `src/App.tsx`: lift `useChat`, compose zones, mount one `<Toaster />`
+- [x] 2.7 `index.html`: static single `class="theme-<name>"` on `<html>`
+- [x] 2.8 Delete `src/App.css`; verify `canManageModels` gating + Enter-to-send
+- [x] 2.9 Exit check: trio green; zones render at lg/md/<md
 
 ## Phase 3: S3 Roster & Dialogs [app]
 
