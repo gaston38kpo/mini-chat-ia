@@ -61,8 +61,8 @@ Chain strategy: stacked-to-main
 
 ## Phase 5: S5 Delete antd [config]
 
-- [ ] 5.1 Remove `antd` + `@ant-design/icons` from `package.json`; drop `antd/dist/reset.css` in `src/main.tsx`
-- [ ] 5.2 Delete leftover `src/component/*.css`
-- [ ] 5.3 Verify `src/**` (read-only) has no antd imports; no `nuqs`/`next-themes` in `package.json` (read-only)
-- [ ] 5.4 Diff `src/chat/providers/**`, `src/helper/{serviceHelper,chatHelper,modelHelper}.ts`, `src/store/**`, `src/constants/**` (read-only) → unchanged
-- [ ] 5.5 Exit check: trio green
+- [x] 5.1 Remove `antd` + `@ant-design/icons` from `package.json`; drop `antd/dist/reset.css` in `src/main.tsx`
+- [x] 5.2 Delete leftover `src/component/*.css`
+- [x] 5.3 Verify `src/**` (read-only) has no antd imports; no `nuqs`/`next-themes` in `package.json` (read-only)
+- [x] 5.4 Diff `src/chat/providers/**`, `src/helper/{serviceHelper,chatHelper,modelHelper}.ts`, `src/store/**`, `src/constants/**` (read-only) → unchanged
+- [x] 5.5 Exit check: trio green
