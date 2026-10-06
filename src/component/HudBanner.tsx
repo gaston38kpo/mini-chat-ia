@@ -9,9 +9,8 @@ interface HudBannerProps {
 
 /**
  * Rank 1 zone: identity plate plus the provider loadout. The title plate is the
- * banner/ribbon treatment; the provider selector (still Ant Design in this
- * slice) is the loadout control and stays a single source of truth for the
- * active provider.
+ * banner/ribbon treatment; the provider selector (8bitcn select + dialog) is the
+ * loadout control and stays a single source of truth for the active provider.
  */
 const HudBanner = ({ appConfig, providerLabel }: HudBannerProps) => {
     return (

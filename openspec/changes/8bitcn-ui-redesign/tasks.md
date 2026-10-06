@@ -43,12 +43,12 @@ Chain strategy: stacked-to-main
 
 ## Phase 3: S3 Roster & Dialogs [app]
 
-- [ ] 3.1 `src/component/ModelList.tsx` → `combo-box`; disable while loading/empty
-- [ ] 3.2 `src/component/ProviderSelector.tsx` → `Dialog` + manual `Field`/`FieldError`; hide delete at one provider
-- [ ] 3.3 `RosterPanel.tsx`: equipped `Badge` + gated unmount (lucide `Download`)
-- [ ] 3.4 Delete `src/component/ModelList.css`, `src/component/ProviderSelector.css`
-- [ ] 3.5 Manual: provider create → reload persists under `mini-chat-ia/providers`; invalid submit shows error
-- [ ] 3.6 Exit check: trio green
+- [x] 3.1 `src/component/ModelList.tsx` → `combo-box`; disable while loading/empty
+- [x] 3.2 `src/component/ProviderSelector.tsx` → `Dialog` + manual `Field`/`FieldError`; hide delete at one provider
+- [x] 3.3 `RosterPanel.tsx`: equipped `Badge` + gated unmount (lucide `Download`)
+- [x] 3.4 Delete `src/component/ModelList.css`, `src/component/ProviderSelector.css`
+- [x] 3.5 Manual: provider create → reload persists under `mini-chat-ia/providers`; invalid submit shows error
+- [x] 3.6 Exit check: trio green
 
 ## Phase 4: S4 Chronicle, Composer & Toast [app + vendored]
 
