@@ -146,8 +146,8 @@ a la factory.
 
 | `canManageModels` | Que hace la UI |
 | --- | --- |
-| `true` | Muestra "Montar", desmonta al montar otro modelo y ofrece "Desmontar". |
-| `false` | Muestra "Elegir" y no toca modelos. |
+| `true` | Al elegir un modelo lo monta (desmontando el anterior) y el panel ofrece "Desmontar". |
+| `false` | Solo permite elegir el modelo; no monta, desmonta ni muestra "Desmontar". |
 
 **No hay que tocar los hooks por esto.** `useModelList`, `useSelectedModel` y
 `RosterPanel` ya leen `provider.capabilities.canManageModels` (via
