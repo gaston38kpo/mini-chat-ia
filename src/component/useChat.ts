@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type React from "react";
 import { message } from "antd";
-import { chatProvider } from "../chat/providers";
+import useChatProvider from "./useChatProvider";
 import { createAssistantMessage, createUserMessage } from "../helper/chatHelper";
 import { TOAST_MESSAGES } from "../helper/toastMessages";
 import type { ChatMessage } from "../chat/providers/chatProvider.contract";
@@ -13,6 +13,7 @@ interface UseChatParams {
 }
 
 const useChat = ({ selectedModel, setLastResponseId }: UseChatParams) => {
+    const { provider } = useChatProvider();
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [currentMessage, setCurrentMessage] = useState<string>("");
     const [isSending, setIsSending] = useState<boolean>(false);
@@ -22,7 +23,7 @@ const useChat = ({ selectedModel, setLastResponseId }: UseChatParams) => {
 
         if (isSending) return;
 
-        if (!selectedModel?.key) {
+        if (!provider || !selectedModel?.key) {
             message.error(TOAST_MESSAGES.CHAT_SEND_ERROR);
             return;
         }
@@ -43,7 +44,7 @@ const useChat = ({ selectedModel, setLastResponseId }: UseChatParams) => {
         ]);
 
         try {
-            const { conversationId } = await chatProvider.streamMessage({
+            const { conversationId } = await provider.streamMessage({
                 model: selectedModel.key,
                 input: text,
                 messages,

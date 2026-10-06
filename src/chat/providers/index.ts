@@ -1,18 +1,29 @@
 import { createLmStudioProvider } from "./lmStudioProvider";
 import { createOpenAiCompatibleProvider } from "./openAiCompatibleProvider";
-import { API_KEY, DEFAULT_API_BASE_URL, PROVIDER_ID } from "../../constants/appConstants";
 import type { ChatProvider } from "./chatProvider.contract";
+
+export type ProviderKind = "lmstudio" | "openai-compatible";
 
 type ProviderFactory = (config: { baseUrl: string; apiKey?: string }) => ChatProvider;
 
-const PROVIDERS: Record<string, ProviderFactory> = {
-    lmstudio: createLmStudioProvider,
+const PROVIDERS: Record<ProviderKind, ProviderFactory> = {
+    "lmstudio": createLmStudioProvider,
     "openai-compatible": createOpenAiCompatibleProvider
 };
 
-const createProvider = PROVIDERS[PROVIDER_ID] ?? createLmStudioProvider;
+const DEFAULT_PROVIDER_KIND: ProviderKind = "openai-compatible";
 
-export const chatProvider = createProvider({
-    baseUrl: DEFAULT_API_BASE_URL,
-    apiKey: API_KEY
-});
+/**
+ * Construye el ChatProvider para el tipo pedido con su configuracion.
+ * El consumidor (hook de UI) decide cual usar segun el proveedor activo.
+ */
+const createProvider = (
+    kind: ProviderKind,
+    config: { baseUrl: string; apiKey?: string }
+): ChatProvider => {
+    const factory = PROVIDERS[kind] ?? PROVIDERS[DEFAULT_PROVIDER_KIND];
+
+    return factory(config);
+};
+
+export { createProvider };

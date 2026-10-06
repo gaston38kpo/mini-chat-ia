@@ -1,19 +1,22 @@
 import { Button, Card, Layout, Space, Tag, Typography } from "antd";
 import { DownloadOutlined } from "@ant-design/icons";
 import ModelList from "./component/ModelList";
+import ProviderSelector from "./component/ProviderSelector";
+import useChatProvider from "./component/useChatProvider";
 import useSelectedModel from "./component/useSelectedModel";
 import Chat from "./component/Chat";
-import { chatProvider } from "./chat/providers";
-import { APP_CONFIG } from "./constants/appConfig";
+import { getAppConfig } from "./constants/appConfig";
 import "./App.css";
 
 const { Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
 
 function App() {
+    const { provider, providerLabel } = useChatProvider();
     const { selectedModel, isUnloading, onUnloadModel } = useSelectedModel();
+    const appConfig = getAppConfig(providerLabel);
     const hasSelectedModel = Boolean(selectedModel.key);
-    const canManageModels = chatProvider.capabilities.canManageModels;
+    const canManageModels = provider?.capabilities.canManageModels ?? false;
 
     return (
         <Layout className="app-layout">
@@ -24,20 +27,22 @@ function App() {
                         <header>
                             <Space direction="vertical" size="small" className="app-stack">
 
-                                <Tag color="blue" className="app-fit-content">{APP_CONFIG.name}</Tag>
+                                <Tag color="blue" className="app-fit-content">{appConfig.name}</Tag>
 
                                 <Title level={2} className="app-title">
-                                    {APP_CONFIG.title}
+                                    {appConfig.title}
                                 </Title>
 
                                 <Paragraph type="secondary" className="app-paragraph">
-                                    {APP_CONFIG.tagline}
+                                    {appConfig.tagline}
                                 </Paragraph>
+
+                                <ProviderSelector />
 
                             </Space>
                         </header>
 
-                        <Card type="inner" title={APP_CONFIG.modelsSectionTitle}>
+                        <Card type="inner" title={appConfig.modelsSectionTitle}>
                             <ModelList />
                         </Card>
 

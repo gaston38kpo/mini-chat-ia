@@ -1,5 +1,8 @@
 const DEFAULT_API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://192.168.1.68:1234/api/v1";
 
+// Default propio de LM Studio, independiente de VITE_API_BASE_URL (que puede apuntar a otro backend).
+const LM_STUDIO_DEFAULT_BASE_URL = "http://localhost:1234/api/v1";
+
 const PROVIDER_ID = import.meta.env.VITE_PROVIDER ?? "lmstudio";
 
 const API_KEY = import.meta.env.VITE_API_KEY ?? "";
@@ -27,6 +30,7 @@ const TOAST_MESSAGES = {
 
 export {
     DEFAULT_API_BASE_URL,
+    LM_STUDIO_DEFAULT_BASE_URL,
     PROVIDER_ID,
     API_KEY,
     CONTENT_TYPE_JSON,

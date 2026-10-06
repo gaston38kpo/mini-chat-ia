@@ -1,17 +1,29 @@
 /**
  * Configuracion de marca de la aplicacion.
- * Cambia APP_NAME y PROVIDER_LABEL para reutilizar el proyecto en otro producto.
- * Los textos que dependen de la marca se derivan de estas constantes.
+ * El titulo y el encabezado de modelos se derivan del proveedor activo,
+ * asi el branding deja de estar atado a un backend puntual.
  */
-const APP_NAME = "Mini Chat";
-const PROVIDER_LABEL = "LM Studio";
 
-const APP_CONFIG = {
-    name: APP_NAME,
-    providerLabel: PROVIDER_LABEL,
-    title: `${APP_NAME} IA para API de ${PROVIDER_LABEL}`,
-    tagline: "Selecciona un modelo para chatear.",
-    modelsSectionTitle: `Modelos disponibles en ${PROVIDER_LABEL}`
+const APP_NAME = "Mini Chat";
+const FALLBACK_PROVIDER_LABEL = "tu backend";
+
+interface AppConfig {
+    name: string;
+    title: string;
+    tagline: string;
+    modelsSectionTitle: string;
+}
+
+const getAppConfig = (providerLabel: string): AppConfig => {
+    const label = providerLabel.trim() || FALLBACK_PROVIDER_LABEL;
+
+    return {
+        name: APP_NAME,
+        title: `${APP_NAME} IA para API de ${label}`,
+        tagline: "Selecciona un modelo para chatear.",
+        modelsSectionTitle: `Modelos disponibles en ${label}`
+    };
 };
 
-export { APP_CONFIG };
+export { getAppConfig };
+export type { AppConfig };
