@@ -1,4 +1,4 @@
-import { Button, Flex, List, Tag, Typography } from "antd";
+import { Flex, Select, Tag, Typography } from "antd";
 import { useModelStore } from "../store/modelStore";
 import useModelList from "./useModelList";
 import "./ModelList.css";
@@ -7,12 +7,18 @@ const { Title } = Typography;
 
 const ModelList = () => {
     const setSelectedModel = useModelStore((state) => state.setSelectedModel);
+    const selectedModel = useModelStore((state) => state.selectedModel);
     const { models, loadingKey, canManageModels, onClickModel } = useModelList({ setSelectedModel });
     const isLoading = canManageModels && loadingKey !== null;
-    const getActionLabel = (key: string): string => {
-        if (!canManageModels) return "Elegir";
 
-        return loadingKey === key ? "Montando..." : "Montar";
+    const onSelectModel = (key: string): void => {
+        if (key === selectedModel.key) return;
+
+        const model = models.find((item) => item.key === key);
+
+        if (!model) return;
+
+        onClickModel(model.key, model.displayName);
     };
 
     return (
@@ -29,32 +35,19 @@ const ModelList = () => {
 
             </Flex>
 
-            <List
-                bordered
-                split
-                className="model-list"
-                dataSource={models}
-                renderItem={(model) => (
-                    <List.Item key={model.key} className="model-list-item">
-                        <Flex justify="space-between" align="center" gap={12} className="model-list-row" wrap>
-
-                            <span className="model-list-name">
-                                {model.displayName}
-                            </span>
-
-                            <Button
-                                type={canManageModels && loadingKey === model.key ? "dashed" : "primary"}
-                                loading={canManageModels && loadingKey === model.key}
-                                disabled={isLoading}
-                                size="small"
-                                onClick={() => onClickModel(model.key, model.displayName)}
-                            >
-                                {getActionLabel(model.key)}
-                            </Button>
-
-                        </Flex>
-                    </List.Item>
-                )}
+            <Select
+                className="model-list-select"
+                placeholder="Elegí un modelo"
+                value={selectedModel.key || undefined}
+                loading={isLoading}
+                disabled={isLoading || models.length === 0}
+                onChange={onSelectModel}
+                options={models.map((model) => ({
+                    value: model.key,
+                    label: model.displayName
+                }))}
+                showSearch
+                optionFilterProp="label"
             />
         </Flex>
     );
