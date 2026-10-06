@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/8bit/input";
 import { ScrollArea } from "@/components/ui/8bit/scroll-area";
 import { Spinner } from "@/components/ui/8bit/spinner";
 import { cn } from "@/lib/utils";
+import { useEffect, useRef } from "react";
 import type React from "react";
 import type { ChatMessage } from "../chat/providers/chatProvider.contract";
 import type { SelectedModel } from "../constants/appConstants";
@@ -41,6 +42,23 @@ const ChroniclePanel = ({
 }: ChroniclePanelProps) => {
     const lastMessage = messages[messages.length - 1];
     const isWaiting = isSending && !lastMessage?.content;
+    const bottomRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const viewport = bottomRef.current?.closest<HTMLElement>(
+            '[data-slot="scroll-area-viewport"]'
+        );
+
+        if (!viewport) return;
+
+        const distanceFromBottom =
+            viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+
+        // Follow the stream only when the user is already near the bottom.
+        if (distanceFromBottom < 80) {
+            viewport.scrollTop = viewport.scrollHeight;
+        }
+    }, [messages]);
 
     return (
         <Card className="h-full min-h-0">
@@ -107,6 +125,8 @@ const ChroniclePanel = ({
                                 <span>Esperando respuesta...</span>
                             </div>
                         )}
+
+                        <div ref={bottomRef} />
                     </div>
                 </ScrollArea>
 
