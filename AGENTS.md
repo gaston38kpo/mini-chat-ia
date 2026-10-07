@@ -58,6 +58,27 @@ Layer boundaries:
 - Follow existing file and naming patterns in `src/component`, `src/chat/providers`, and `src/store`.
 - Respect Oxlint rules; `npm run lint` must pass before finishing.
 
+## Simplicity (ponytail principles)
+
+Always active for coding tasks. Understand the problem first — read the code the change touches and trace the real flow — then climb this ladder and stop at the first rung that holds:
+
+1. Does it need to exist? Speculative need = skip it.
+2. Already in this codebase? Reuse it, do not rewrite.
+3. Does the standard library do it? Use it.
+4. Does a native platform/browser feature cover it? Use it.
+5. Does an already-installed dependency solve it? Use it; never add a new dependency for what a few lines can do.
+6. Can it be one line? One line.
+7. Only then: the minimum code that works.
+
+Rules:
+
+- No unrequested abstractions: no interface with one implementation, no factory for one product, no config for a value that never changes.
+- Deletion over addition; prefer the shortest working diff.
+- Fix bugs at the shared root cause, not the symptom; grep every caller before editing.
+- Mark deliberate simplifications that cut a real corner with a `ponytail:` comment naming the ceiling and the upgrade path.
+- Never simplify away input validation at trust boundaries, error handling that prevents data loss, security, or accessibility.
+- This repository has no test runner: the check behind non-trivial logic is `npm run lint` + `npm run typecheck` + `npm run build`, plus manual verification of the flow.
+
 ## Known Pitfalls
 
 - `selectedModel` may be empty during initial render; use defensive UI access patterns when touching model display logic.
