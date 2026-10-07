@@ -1,72 +1,58 @@
-# Mini Chat IA
+# mini-chat-ia
 
-Plantilla base para construir chats de IA con backend **pluggable**, vestida como
-una consola RPG en 8bit. Hoy incluye dos adaptadores -- LM Studio (gestiona
-modelos) y cualquier API compatible con OpenAI -- detras de una sola interfaz
-(`ChatProvider`). El resto de la app no sabe cual esta activo. Ver
-[`docs/arquitectura.md`](docs/arquitectura.md).
+Chat mínimo en React que consume un modelo local de **LM Studio** por su API
+OpenAI-compatible (`/v1/chat/completions`), con streaming token por token.
 
-## Inicio rapido
+El objetivo es didáctico: entender cómo se consume un API de IA desde el frontend,
+sin capas de más.
+
+## Requisitos
+
+- Node 20+
+- [LM Studio](https://lmstudio.ai) corriendo con un modelo cargado y el servidor
+  local habilitado (pestaña *Developer* → *Start Server*). Por defecto escucha en
+  `http://localhost:1234`.
+
+## Empezar
 
 ```bash
 npm install
 npm run dev
 ```
 
-Abre la URL que imprime Vite, elige un proveedor y un modelo para empezar a
-chatear. Los proveedores se administran desde la propia UI.
+Abrí la URL que imprime Vite y escribí un mensaje.
 
-## Variables de entorno
+## Cómo funciona
 
-Crea un `.env` en la raiz (base: [`.env.example`](.env.example)). Todas son
-opcionales.
+Todo el código vive en cuatro archivos:
 
-El `.env` es una **semilla/fallback**: la app siembra dos proveedores (LM Studio
-y OpenCode Go) y los proveedores activos se eligen y editan en la UI, que los
-persiste en `localStorage` (clave `mini-chat-ia/providers`).
+| Archivo | Rol |
+| --- | --- |
+| `src/App.tsx` | UI del chat: lista de mensajes + formulario. |
+| `src/useLocalChat.ts` | Estado (`messages`, `isSending`) y el caso de uso `send`. |
+| `src/lmStudioClient.ts` | El tema del proyecto: `fetch` al API + parseo del stream SSE. |
+| `src/types.ts` | El tipo `ChatMessage`. |
 
-| Variable | Descripcion | Default |
-| --- | --- | --- |
-| `VITE_API_BASE_URL` | URL base de fallback del transporte HTTP. | `http://192.168.1.68:1234/api/v1` |
-| `VITE_PROVIDER` | Decide cual proveedor sembrado queda activo (`lmstudio`, `openai-compatible`). | `lmstudio` |
-| `VITE_API_KEY` | API key con la que se siembra el proveedor LM Studio. | `""` (vacio) |
-| `OPENCODE_GO_KEY` | Secreto del proxy de Vite `/opencode-go`. Va **sin** prefijo `VITE_` para no exponerlo al bundle. | `""` (vacio) |
+Flujo de un mensaje:
+
+1. `App` llama `send(input)` y limpia el campo.
+2. `useLocalChat` agrega tu mensaje y un mensaje vacío del asistente, y llama al cliente.
+3. `lmStudioClient` hace `POST /v1/chat/completions` con `stream: true` y lee la
+   respuesta como Server-Sent Events, entregando cada token por `onToken`.
+4. `useLocalChat` va pegando cada token al último mensaje; React re-renderiza.
+
+## Configuración
+
+La URL del backend se puede pisar con `.env` (ver `.env.example`):
+
+```
+VITE_LM_STUDIO_URL=http://localhost:1234/v1
+```
 
 ## Scripts
 
-| Script | Que hace |
-| --- | --- |
-| `npm run dev` | Servidor de desarrollo de Vite (incluye el proxy `/opencode-go`). |
-| `npm run build` | Build de produccion. |
-| `npm run lint` | Corre Oxlint. |
-| `npm run typecheck` | TypeScript en modo `--noEmit` (mas el checkout vendored). |
-| `npm run preview` | Previsualiza el build. |
-
-## Cambiar de backend
-
-Elige o agrega un proveedor desde la UI (selector en el HUD). Para crear un
-tipo de provider nuevo, sigue la guia:
-[`docs/providers.md`](docs/providers.md).
-
-## Usar como plantilla
-
-Este repo es una base reutilizable. El checklist para clonarlo y personalizarlo
-esta en [`docs/plantilla.md`](docs/plantilla.md).
-
-## Estructura
-
-| Carpeta | Contenido |
-| --- | --- |
-| `src/component/` | Componentes y hooks de la consola (`GameShell.tsx`, `ChroniclePanel.tsx`, `useChat.ts`, ...). |
-| `src/components/ui/` | UI vendored 8bitcn/Radix (`8bit/`, `sonner`). |
-| `src/chat/providers/` | Adaptadores `ChatProvider`, la factory y el registro. |
-| `src/helper/` | Transporte (`serviceHelper`) y utilidades (`toast`, helpers). |
-| `src/constants/` | Config y env (`appConstants.ts`, `appConfig.ts`). |
-| `src/store/` | Stores Zustand (`modelStore.ts`, `providerStore.ts`). |
-| `src/lib/` | Utilidades compartidas (`utils.ts` -> `cn`). |
-
-## Documentacion
-
-- [`docs/arquitectura.md`](docs/arquitectura.md) -- capas, flujo y estado.
-- [`docs/providers.md`](docs/providers.md) -- como agregar un provider.
-- [`docs/plantilla.md`](docs/plantilla.md) -- usar el repo como base.
+- `npm run dev` — servidor de desarrollo
+- `npm run build` — build de producción
+- `npm run preview` — previsualizar el build
+- `npm run lint` — Oxlint
+- `npm run typecheck` — `tsc --noEmit`

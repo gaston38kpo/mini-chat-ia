@@ -1,94 +1,42 @@
 # Project Guidelines
 
-## Tech Stack
+## What this is
+A minimal, deliberately boring React app whose only purpose is to teach how to
+consume a local AI model (LM Studio) from the frontend. Keep it small.
 
-- React 19, Vite 8, TypeScript 7 (strict), Zustand 5
-- UI: Tailwind CSS 4 + 8bitcn/Radix (`src/components/ui`), icons `lucide-react`, `cmdk`, notifications `sonner`, markdown `react-markdown`
-- Linting: Oxlint with React and Oxc plugins (see `.oxlintrc.json`)
+## Tech Stack
+- React 19, Vite 8, TypeScript 7 (strict)
+- Tailwind CSS 4 (via `@tailwindcss/vite`)
+- Linting: Oxlint (`.oxlintrc.json`)
 - No test runner or formatter is configured
 
 ## Startup Checklist for Agents
-
-- Read this file, `package.json`, and `openspec/config.yaml` before making substantial changes.
-- Keep changes within existing patterns in `src/component`, `src/components/ui`, `src/chat/providers`, `src/helper`, `src/store`, and `src/lib`.
-- Run `npm run lint` after meaningful edits.
+- Read this file and `package.json` before making substantial changes.
+- Run `npm run lint` after edits.
 - Run `npm run typecheck` and `npm run build` before finishing.
 - Do not add or require tests in this repository.
 
-## Build and Test
-
-- `npm run dev` — start the Vite dev server (includes the `/opencode-go` proxy)
+## Commands
+- `npm run dev` — Vite dev server
 - `npm run build` — production build
-- `npm run lint` — run Oxlint
-- `npm run typecheck` — run `tsc --noEmit` (plus the vendored checkout)
-- `npm run preview` — preview the production build
-- No test runner is available; do not generate or require tests
+- `npm run preview` — preview the build
+- `npm run lint` — Oxlint
+- `npm run typecheck` — `tsc --noEmit`
 
 ## Architecture
+Four files, no layers:
 
-Single-page React app organized in layers under `src/`:
+- `src/App.tsx` — chat UI (message list + form); owns the input value.
+- `src/useLocalChat.ts` — chat state (`messages`, `isSending`) and `send`.
+- `src/lmStudioClient.ts` — the API call: `fetch` to LM Studio's OpenAI-compatible
+  `/v1/chat/completions` plus hand-rolled SSE parsing. This file is the lesson.
+- `src/types.ts` — `ChatMessage`.
 
-- `src/component/` — RPG console components and hooks (`GameShell.tsx`, `ChroniclePanel.tsx`, `useChat.ts`, ...)
-- `src/components/ui/` — vendored 8bitcn/Radix UI (`8bit/`, `sonner`)
-- `src/chat/providers/` — `ChatProvider` adapters, the `createProvider` factory, and the `PROVIDERS` registry
-- `src/helper/` — transport (`serviceHelper.ts`), notifications (`toast.ts`), and utilities
-- `src/constants/` — config and env access (`appConstants.ts`, `appConfig.ts`)
-- `src/store/` — Zustand stores (`modelStore.ts`, `providerStore.ts`)
-- `src/lib/` — shared utilities (`utils.ts` -> `cn`)
+Data flow: `App` -> `useLocalChat` -> `lmStudioClient` -> LM Studio -> tokens back.
 
-Typical data flow: `useChatProvider` resolves the active provider from
-`providerStore` and builds a `ChatProvider` with `createProvider(kind, config)`;
-hooks call the provider, update the store, and components read from the store.
-
-Layer boundaries:
-
-- Components and hooks own rendering, user interactions, and local state.
-- Provider adapters own network calls, response parsing, and API error logging.
-- `src/helper/serviceHelper.ts` owns the protocol-agnostic HTTP/SSE transport.
-- Stores own shared client state and setters.
-- `src/components/ui/**` is vendored UI; avoid editing it unless truly necessary.
-
-## Conventions
-
-- Use functional components and React hooks.
-- Create Zustand stores with `create()` from `zustand`; use `persist` when state must survive reload.
-- Keep provider adapters as factories (`create<Name>Provider`) that return a `ChatProvider`.
-- UI comes from `@/components/ui` (8bitcn/Radix); the `cn` helper is imported from `src/lib/utils`.
-- `.env` is a seed/fallback: providers are chosen in the UI and persisted in `localStorage` (key `mini-chat-ia/providers`).
-- Follow existing file and naming patterns in `src/component`, `src/chat/providers`, and `src/store`.
+## Rules
+- Keep it minimal. No state library, no router, no component kit, no extra deps.
+- The backend is LM Studio's OpenAI-compatible API. Loading/unloading models is
+  done in the LM Studio UI, not in this app.
+- Code and comments in English; UI copy stays in Spanish.
 - Respect Oxlint rules; `npm run lint` must pass before finishing.
-
-## Simplicity (ponytail principles)
-
-Always active for coding tasks. Understand the problem first — read the code the change touches and trace the real flow — then climb this ladder and stop at the first rung that holds:
-
-1. Does it need to exist? Speculative need = skip it.
-2. Already in this codebase? Reuse it, do not rewrite.
-3. Does the standard library do it? Use it.
-4. Does a native platform/browser feature cover it? Use it.
-5. Does an already-installed dependency solve it? Use it; never add a new dependency for what a few lines can do.
-6. Can it be one line? One line.
-7. Only then: the minimum code that works.
-
-Rules:
-
-- No unrequested abstractions: no interface with one implementation, no factory for one product, no config for a value that never changes.
-- Deletion over addition; prefer the shortest working diff.
-- Fix bugs at the shared root cause, not the symptom; grep every caller before editing.
-- Mark deliberate simplifications that cut a real corner with a `ponytail:` comment naming the ceiling and the upgrade path.
-- Never simplify away input validation at trust boundaries, error handling that prevents data loss, security, or accessibility.
-- This repository has no test runner: the check behind non-trivial logic is `npm run lint` + `npm run typecheck` + `npm run build`, plus manual verification of the flow.
-
-## Known Pitfalls
-
-- `selectedModel` may be empty during initial render; use defensive UI access patterns when touching model display logic.
-- Model unload/load sequencing can race if asynchronous calls are reordered; avoid introducing additional non-awaited transitions in model switching.
-- `LM_STUDIO_DEFAULT_BASE_URL` and the `VITE_API_BASE_URL` fallback are development defaults; do not change them unless explicitly requested.
-- `OPENCODE_GO_KEY` must NOT use the `VITE_` prefix; with the prefix it would be exposed to the client bundle.
-- A backend that is not proxied in the dev server can fail with CORS.
-
-## Spec-Driven Development
-
-This project follows an OpenSpec workflow. Before proposing large or risky changes, review `openspec/config.yaml` for rules on proposals, specifications, design docs, and task breakdowns.
-
-When changes are large or risky, follow the OpenSpec proposal/spec/design/task flow before implementation.

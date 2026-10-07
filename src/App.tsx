@@ -1,66 +1,51 @@
-import { Toaster } from "./components/ui/sonner";
-import GameShell from "./component/GameShell";
-import HudBanner from "./component/HudBanner";
-import RosterPanel from "./component/RosterPanel";
-import ChroniclePanel from "./component/ChroniclePanel";
-import StatusStrip from "./component/StatusStrip";
-import useChat from "./component/useChat";
-import useChatProvider from "./component/useChatProvider";
-import useSelectedModel from "./component/useSelectedModel";
-import { useModelStore } from "./store/modelStore";
-import { getAppConfig } from "./constants/appConfig";
+import { useState, type FormEvent } from "react";
+import { useLocalChat } from "./useLocalChat";
 
 function App() {
-    const { provider, providerLabel } = useChatProvider();
-    const { selectedModel, isUnloading, onUnloadModel } = useSelectedModel();
-    const setLastResponseId = useModelStore((state) => state.setLastResponseId);
-    const appConfig = getAppConfig(providerLabel);
-    const canManageModels = provider?.capabilities.canManageModels ?? false;
+    const [input, setInput] = useState("");
+    const { messages, isSending, send } = useLocalChat();
 
-    // Lifted from the former Chat.tsx so the status strip can read the message
-    // count and the sending flag. The chat state flows as props into
-    // ChroniclePanel and StatusStrip.
-    const {
-        messages,
-        currentMessage,
-        isSending,
-        onSendMessage,
-        onChangeInputText
-    } = useChat({ selectedModel, setLastResponseId });
+    function onSubmit(event: FormEvent) {
+        event.preventDefault();
+        send(input);
+        setInput("");
+    }
 
     return (
-        <>
-            <GameShell
-                hud={<HudBanner appConfig={appConfig} providerLabel={providerLabel} />}
-                roster={
-                    <RosterPanel
-                        selectedModel={selectedModel}
-                        canManageModels={canManageModels}
-                        isUnloading={isUnloading}
-                        onUnloadModel={onUnloadModel}
-                    />
-                }
-                chronicle={
-                    <ChroniclePanel
-                        selectedModel={selectedModel}
-                        messages={messages}
-                        currentMessage={currentMessage}
-                        isSending={isSending}
-                        onSendMessage={onSendMessage}
-                        onChangeInputText={onChangeInputText}
-                    />
-                }
-                status={
-                    <StatusStrip
-                        messageCount={messages.length}
-                        connectionLabel={providerLabel}
-                        isSending={isSending}
-                    />
-                }
-            />
+        <div className="mx-auto flex h-dvh max-w-2xl flex-col gap-4 p-4">
+            <h1 className="text-lg font-semibold">Chat con LM Studio</h1>
 
-            <Toaster />
-        </>
+            <div className="flex-1 space-y-3 overflow-y-auto">
+                {messages.map((message, index) => (
+                    <div
+                        key={index}
+                        className={message.role === "user" ? "text-right" : "text-left"}
+                    >
+                        <span className="inline-block whitespace-pre-wrap rounded border border-gray-300 px-3 py-2 text-left">
+                            {message.content || "…"}
+                        </span>
+                    </div>
+                ))}
+            </div>
+
+            <form onSubmit={onSubmit} className="flex gap-2">
+                <input
+                    value={input}
+                    onChange={(event) => setInput(event.target.value)}
+                    disabled={isSending}
+                    placeholder="Escribí tu mensaje"
+                    className="flex-1 rounded border border-gray-300 px-3 py-2"
+                />
+
+                <button
+                    type="submit"
+                    disabled={isSending}
+                    className="rounded border border-gray-300 px-4 py-2"
+                >
+                    {isSending ? "..." : "Enviar"}
+                </button>
+            </form>
+        </div>
     );
 }
 
