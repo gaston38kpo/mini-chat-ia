@@ -128,7 +128,7 @@ const ChroniclePanel = ({
                                                 : message.modelName || selectedModel.displayName}
                                         </span>
 
-                                        <div className="mt-2 text-sm leading-relaxed [font-family:system-ui] [&_a]:underline [&_code]:bg-foreground/10 [&_code]:px-1 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_ol]:my-1 [&_ol]:list-decimal [&_ol]:pl-4 [&_p]:my-1 [&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:bg-foreground/10 [&_pre]:p-2 [&_ul]:my-1 [&_ul]:list-disc [&_ul]:pl-4">
+                                        <div className="retro-body mt-2 text-lg leading-relaxed [&_a]:underline [&_code]:bg-foreground/10 [&_code]:px-1 [&_h1]:text-2xl [&_h2]:text-xl [&_h3]:text-lg [&_ol]:my-1 [&_ol]:list-decimal [&_ol]:pl-4 [&_p]:my-1 [&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:bg-foreground/10 [&_pre]:p-2 [&_ul]:my-1 [&_ul]:list-disc [&_ul]:pl-4">
                                             <Markdown>{message.content}</Markdown>
                                         </div>
                                     </div>

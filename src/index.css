@@ -131,3 +131,20 @@
   font-display: swap;
   src: url("./assets/fonts/PressStart2P-Regular-latin.woff2") format("woff2");
 }
+
+/* Readable pixel face for long-form text (chat messages). Display pixel fonts
+ * like Press Start 2P are all-caps and wide, so body copy uses VT323 instead.
+ * Self-hosted, latin subset (covers Spanish accents).
+ */
+@font-face {
+  font-family: "VT323";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/VT323-Regular-latin.woff2") format("woff2");
+}
+
+/* Body-copy companion to `.retro` (Press Start 2P). Use for running text. */
+.retro-body {
+  font-family: "VT323", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
