@@ -1,4 +1,4 @@
-import * as ProgressPrimitive from "@radix-ui/react-progress";
+import * as ProgressPrimitive from "radix-ui/progress";
 import { type VariantProps, cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";

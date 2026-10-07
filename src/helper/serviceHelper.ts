@@ -113,4 +113,4 @@ const requestStream = async (
     }
 };
 
-export { request, requestStream, headers, ApiRequestError };
+export { request, requestStream, headers };
