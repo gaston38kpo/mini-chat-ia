@@ -76,7 +76,7 @@ const ModelList = () => {
                         disabled={isUnavailable}
                         className="w-full justify-between"
                     >
-                        <span className="truncate">
+                        <span className="retro-body min-w-0 truncate text-base">
                             {selectedModel.displayName || "Elegí un modelo"}
                         </span>
 
@@ -90,7 +90,8 @@ const ModelList = () => {
 
                 <PopoverContent
                     align="start"
-                    className="w-[var(--radix-popover-trigger-width)] p-0"
+                    font="normal"
+                    className="retro-body w-[var(--radix-popover-trigger-width)] p-0"
                 >
                     <Command>
                         <CommandInput placeholder="Buscar modelo" />
@@ -114,7 +115,9 @@ const ModelList = () => {
                                                 )}
                                             />
 
-                                            <span className="truncate">{model.displayName}</span>
+                                            <span className="min-w-0 flex-1 break-words text-base">
+                                                {model.displayName}
+                                            </span>
                                         </CommandItem>
                                     );
                                 })}

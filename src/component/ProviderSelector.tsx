@@ -186,7 +186,9 @@ const ProviderSelector = () => {
                     <SelectContent>
                         {providers.map((provider) => (
                             <SelectItem key={provider.id} value={provider.id}>
-                                {provider.label}
+                                <span className="retro-body min-w-0 flex-1 text-base break-words">
+                                    {provider.label}
+                                </span>
                             </SelectItem>
                         ))}
                     </SelectContent>
@@ -251,7 +253,9 @@ const ProviderSelector = () => {
                                 <SelectContent>
                                     {KIND_OPTIONS.map((option) => (
                                         <SelectItem key={option.value} value={option.value}>
-                                            {option.label}
+                                            <span className="retro-body min-w-0 flex-1 text-base break-words">
+                                                {option.label}
+                                            </span>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
