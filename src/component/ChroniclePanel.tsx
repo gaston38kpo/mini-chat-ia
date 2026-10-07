@@ -43,6 +43,7 @@ const ChroniclePanel = ({
     const lastMessage = messages[messages.length - 1];
     const isWaiting = isSending && !lastMessage?.content;
     const bottomRef = useRef<HTMLDivElement>(null);
+    const stickToBottomRef = useRef(true);
 
     useEffect(() => {
         const viewport = bottomRef.current?.closest<HTMLElement>(
@@ -51,13 +52,29 @@ const ChroniclePanel = ({
 
         if (!viewport) return;
 
-        const distanceFromBottom =
-            viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+        const onScroll = () => {
+            const distanceFromBottom =
+                viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
 
-        // Follow the stream only when the user is already near the bottom.
-        if (distanceFromBottom < 80) {
-            viewport.scrollTop = viewport.scrollHeight;
-        }
+            // Follow only while the user is at the bottom; a manual scroll-up opts out.
+            stickToBottomRef.current = distanceFromBottom < 80;
+        };
+
+        viewport.addEventListener("scroll", onScroll, { passive: true });
+
+        return () => viewport.removeEventListener("scroll", onScroll);
+    }, []);
+
+    useEffect(() => {
+        if (!stickToBottomRef.current) return;
+
+        const viewport = bottomRef.current?.closest<HTMLElement>(
+            '[data-slot="scroll-area-viewport"]'
+        );
+
+        if (!viewport) return;
+
+        viewport.scrollTop = viewport.scrollHeight;
     }, [messages]);
 
     return (
