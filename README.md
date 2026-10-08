@@ -41,6 +41,28 @@ Flujo de un mensaje:
    respuesta como Server-Sent Events, entregando cada token por `onToken`.
 4. `useLocalChat` va pegando cada token al último mensaje; React re-renderiza.
 
+### Qué es SSE (por qué el texto aparece de a poco)
+
+Con `stream: true`, LM Studio no devuelve la respuesta entera: abre un stream
+**Server-Sent Events** por HTTP y va mandando pedacitos. Cada evento tiene este
+formato:
+
+```
+data: {"choices":[{"delta":{"content":"Hola"}}]}
+
+data: {"choices":[{"delta":{"content":" mundo"}}]}
+
+data: [DONE]
+```
+
+`lmStudioClient.ts` lee ese texto a medida que llega (`reader.read()`), lo junta en
+un buffer y separa los eventos por la línea en blanco (`\n\n`). De cada evento saca
+el texto nuevo (`delta.content`) y se lo entrega a `onToken`; `useLocalChat` lo pega
+al último mensaje. De ahí sale el efecto "escribiendo".
+
+La respuesta se muestra como texto crudo (sin markdown) a propósito: así el código
+queda corto y se ve el núcleo.
+
 ## Configuración
 
 La URL del backend se puede pisar con `.env` (ver `.env.example`):

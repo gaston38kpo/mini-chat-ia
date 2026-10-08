@@ -1,14 +1,17 @@
 import { useState, type FormEvent } from "react";
 import { useLocalChat } from "./useLocalChat";
 
+/** La pantalla: la lista de mensajes y el formulario para escribir. */
 function App() {
+    // El texto del input es estado local de este componente.
     const [input, setInput] = useState("");
+    // `messages`, `isSending` y `send` vienen del hook.
     const { messages, isSending, send } = useLocalChat();
 
     function onSubmit(event: FormEvent) {
-        event.preventDefault();
-        send(input);
-        setInput("");
+        event.preventDefault(); // evita que el formulario recargue la página
+        send(input); // dispara el envío; el hook actualiza el estado
+        setInput(""); // limpiamos el input
     }
 
     return (
@@ -16,12 +19,14 @@ function App() {
             <h1 className="text-lg font-semibold">Chat con LM Studio</h1>
 
             <div className="flex-1 space-y-3 overflow-y-auto">
+                {/* key={index} es seguro acá porque solo agregamos mensajes al final. */}
                 {messages.map((message, index) => (
                     <div
                         key={index}
                         className={message.role === "user" ? "text-right" : "text-left"}
                     >
                         <span className="inline-block whitespace-pre-wrap rounded border border-gray-300 px-3 py-2 text-left">
+                            {/* content vacío = todavía no llegó ningún token */}
                             {message.content || "…"}
                         </span>
                     </div>

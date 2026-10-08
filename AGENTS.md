@@ -38,5 +38,5 @@ Data flow: `App` -> `useLocalChat` -> `lmStudioClient` -> LM Studio -> tokens ba
 - Keep it minimal. No state library, no router, no component kit, no extra deps.
 - The backend is LM Studio's OpenAI-compatible API. Loading/unloading models is
   done in the LM Studio UI, not in this app.
-- Code and comments in English; UI copy stays in Spanish.
+- Code identifiers stay in English; comments and UI copy are in Spanish (the readers are Spanish-speaking students).
 - Respect Oxlint rules; `npm run lint` must pass before finishing.
