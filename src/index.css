@@ -1,1 +1,21 @@
+@import url("https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap");
 @import "tailwindcss";
+
+/* Crimson scale (the palette accent). */
+@theme {
+    --color-crimson-100: #ffe0e6;
+    --color-crimson-200: #ffc2cd;
+    --color-crimson-400: #e8385c;
+    --color-crimson-500: #dc143c; /* crimson */
+    --color-crimson-600: #b8102f;
+}
+
+/*
+ * Kawaii fire theme: rounded Japanese font + warm cream/peach background,
+ * crimson accents, no pink.
+ */
+body {
+    font-family: "M PLUS Rounded 1c", ui-rounded, system-ui, sans-serif;
+    background: linear-gradient(160deg, #fff7ed 0%, #ffe3d3 50%, #ffd6d6 100%);
+    color: #4a1f1a;
+}

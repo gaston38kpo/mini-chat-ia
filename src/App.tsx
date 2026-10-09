@@ -16,7 +16,7 @@ function App() {
 
     return (
         <div className="mx-auto flex h-dvh max-w-2xl flex-col gap-4 p-4">
-            <h1 className="text-lg font-semibold">Chat con LM Studio</h1>
+            <h1 className="bg-gradient-to-r from-orange-500 via-crimson-500 to-crimson-600 bg-clip-text text-lg font-bold text-transparent">🔥 Chat con LM Studio</h1>
 
             <div className="flex-1 space-y-3 overflow-y-auto">
                 {/* key={index} es seguro acá porque solo agregamos mensajes al final. */}
@@ -25,7 +25,12 @@ function App() {
                         key={index}
                         className={message.role === "user" ? "text-right" : "text-left"}
                     >
-                        <span className="inline-block whitespace-pre-wrap rounded border border-gray-300 px-3 py-2 text-left">
+                        <span
+                            className={
+                                "inline-block whitespace-pre-wrap rounded-2xl px-4 py-2 text-left shadow-sm " +
+                                (message.role === "user" ? "bg-gradient-to-br from-crimson-400 to-crimson-600 text-white" : "bg-white")
+                            }
+                        >
                             {/* content vacío = todavía no llegó ningún token */}
                             {message.content || "…"}
                         </span>
@@ -39,15 +44,15 @@ function App() {
                     onChange={(event) => setInput(event.target.value)}
                     disabled={isSending}
                     placeholder="Escribí tu mensaje"
-                    className="flex-1 rounded border border-gray-300 px-3 py-2"
+                    className="flex-1 rounded-full border border-crimson-200 bg-white px-4 py-2 outline-none focus:border-crimson-400"
                 />
 
                 <button
                     type="submit"
                     disabled={isSending}
-                    className="rounded border border-gray-300 px-4 py-2"
+                    className="rounded-full bg-gradient-to-r from-crimson-500 to-crimson-600 px-4 py-2 font-bold text-white disabled:opacity-50"
                 >
-                    {isSending ? "..." : "Enviar"}
+                    {isSending ? "🔥" : "Enviar"}
                 </button>
             </form>
         </div>

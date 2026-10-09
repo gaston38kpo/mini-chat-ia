@@ -13,6 +13,21 @@ const BASE_URL = import.meta.env.VITE_LM_STUDIO_URL ?? "http://localhost:1234/v1
  * evento es una línea `data: {json}` seguida de una línea en blanco, y el último
  * es `data: [DONE]`. Lo parseamos a mano a propósito: este archivo ES la lección
  * de "cómo consumir un API de IA".
+ * Por ejemplo:
+ *
+ * ```
+ * data: {
+ *           "choices": [
+ *               {
+ *                   "delta": {
+ *                       "content": "Hola"
+ *                   }
+ *               }
+ *           ]
+ *       }
+ *
+ * data: [DONE]
+ * ```
  *
  * No devolvemos los tokens: se los pasamos a `onToken` a medida que llegan. Es la
  * forma natural de manejar datos que van apareciendo de a poco.
