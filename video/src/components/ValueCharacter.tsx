@@ -92,15 +92,13 @@ export function ValueCharacter({
                         fontFamily: MONO_FAMILY,
                         fontSize: CHIP_FONT_SIZE,
                         color: ink,
-                        whiteSpace: "nowrap",
+                        whiteSpace: "pre-wrap",
                         overflow: "hidden",
                         boxShadow: `0 0 26px ${accent}66`,
                     }}
                 >
                     <Eyes color={filled ? "#ffffff" : accent} />
-                    <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
-                        {value}
-                    </span>
+                    <span style={{ minWidth: 0 }}>{value}</span>
                 </div>
             </div>
 

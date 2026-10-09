@@ -69,6 +69,10 @@ export type ChatState = { user: string | null; assistant: string };
 /**
  * Lo que lleva el personaje. El valor se parte en tres para que el hueco sea
  * literal: `before` y `after` son el contenedor, `value` es lo que entra.
+ *
+ * RIGOR DE TIPOS: cada `value` se muestra con la notacion real del tipo.
+ * Los strings van entre comillas (aunque la UI no las muestre), los bytes como
+ * Uint8Array, y los contenedores con la forma real del dato.
  */
 export type Carried = {
     before: string;
@@ -93,20 +97,26 @@ const EMPTY: ChatState = { user: null, assistant: "" };
 const SENT: ChatState = { user: USER_MESSAGE, assistant: "" };
 const T1: ChatState = { user: USER_MESSAGE, assistant: "¡Hola" };
 const T2: ChatState = { user: USER_MESSAGE, assistant: "¡Hola! ¿En qué" };
-const T3: ChatState = { user: USER_MESSAGE, assistant: "¡Hola! ¿En qué te ayudo" };
 const T4: ChatState = { user: USER_MESSAGE, assistant: ASSISTANT_REPLY };
 
+/** El campo `content` del ultimo mensaje, que es donde se acumulan los tokens. */
+const CONTENT_OPEN = '{ role: "assistant", content: ';
+const CONTENT_CLOSE = " }";
+
+/** El historial, con el mensaje del usuario ya adentro. */
+const HISTORY_OPEN = '[ { role: "user", content: ';
+
 /**
- * El guion del recorrido. Cada paso dice como se ve el valor y en que
- * contenedor vive: el contenedor se muestra vacio antes de que el valor entre.
+ * El guion del recorrido. Cada paso dice que valor viaja, con que tipo real, y
+ * en que contenedor vive: el contenedor se muestra vacio antes de que entre.
  */
 export const STEPS: Step[] = [
     {
         snippet: "appSubmit",
         focus: [7],
         chipLine: 7,
-        carries: { before: "", value: "Hola", after: "", form: "string" },
-        caption: "Escribis \"Hola\" y el formulario lo manda a send(input).",
+        carries: { before: "", value: '"Hola"', after: "", form: "string" },
+        caption: "El input es un string: \"Hola\". El formulario lo manda a send(input).",
         phase: "out",
         state: EMPTY,
     },
@@ -114,8 +124,8 @@ export const STEPS: Step[] = [
         snippet: "hookSend",
         focus: [6, 8],
         chipLine: 6,
-        carries: { before: "", value: "Hola", after: "", form: "string" },
-        caption: "El string entra al hook: se limpia y se chequea que no este vacio.",
+        carries: { before: "", value: '"Hola"', after: "", form: "string" },
+        caption: "El hook lo limpia con trim(). Sigue siendo un string, y no esta vacio.",
         phase: "out",
         state: EMPTY,
     },
@@ -123,8 +133,13 @@ export const STEPS: Step[] = [
         snippet: "hookSend",
         focus: [10],
         chipLine: 10,
-        carries: { before: "[ ", value: "Hola", after: " ]", form: "array" },
-        caption: "Ahora entra en un historial: el contenedor aparece vacio y despues se llena.",
+        carries: {
+            before: HISTORY_OPEN,
+            value: '"Hola"',
+            after: " } ]",
+            form: "array",
+        },
+        caption: "Ahora el string entra en un ChatMessage, dentro del historial.",
         phase: "out",
         state: EMPTY,
     },
@@ -132,8 +147,13 @@ export const STEPS: Step[] = [
         snippet: "hookSend",
         focus: [12],
         chipLine: 12,
-        carries: { before: "[ ", value: "Hola", after: ', "" ]', form: "ui" },
-        caption: "El historial suma un segundo lugar, vacio, para la respuesta.",
+        carries: {
+            before: HISTORY_OPEN,
+            value: '"Hola"',
+            after: ', { role: "assistant", content: "" } ]',
+            form: "ui",
+        },
+        caption: "El historial suma un segundo mensaje, con el content vacio.",
         phase: "out",
         state: SENT,
     },
@@ -142,21 +162,26 @@ export const STEPS: Step[] = [
         focus: [5, 8, 10, 11],
         chipLine: 10,
         carries: {
-            before: "{ messages: [ ",
-            value: "Hola",
-            after: ', "" ], stream: true }',
+            before: '{ model: "local-model", messages: [ { role: "user", content: ',
+            value: '"Hola"',
+            after: ', { role: "assistant", content: "" } ], stream: true }',
             form: "request",
         },
-        caption: "Todo eso entra en el cuerpo del request que viaja a LM Studio.",
+        caption: "Todo eso entra en el body del request, junto con stream: true.",
         phase: "out",
         state: SENT,
     },
     {
         snippet: "clientReader",
-        focus: [1, 2, 3, 6, 9],
-        chipLine: 9,
-        carries: { before: "", value: "bytes…", after: "", form: "bytes" },
-        caption: "Del otro lado no vuelve texto: vuelven bytes.",
+        focus: [1, 2, 3, 6],
+        chipLine: 6,
+        carries: {
+            before: "",
+            value: "Uint8Array(87) [100, 97, 116, 97, 58, 32, …]",
+            after: "",
+            form: "bytes",
+        },
+        caption: "Del otro lado no vuelve texto: vuelve un Uint8Array. Son bytes.",
         phase: "in",
         state: SENT,
     },
@@ -164,8 +189,13 @@ export const STEPS: Step[] = [
         snippet: "clientFrames",
         focus: [1, 2, 4, 5],
         chipLine: 5,
-        carries: { before: "", value: "data: {…}", after: "", form: "event" },
-        caption: "Se decodifican y se parten por evento SSE. Aparece la linea data:.",
+        carries: {
+            before: "",
+            value: `'data: {"choices":[{"delta":{"content":"¡Hola"}}]}'`,
+            after: "",
+            form: "event",
+        },
+        caption: "El decoder los pasa a texto y queda un evento SSE: un string.",
         phase: "in",
         state: SENT,
     },
@@ -173,8 +203,8 @@ export const STEPS: Step[] = [
         snippet: "clientFrames",
         focus: [9, 11, 13, 15],
         chipLine: 13,
-        carries: { before: "", value: "¡Hola", after: "", form: "token" },
-        caption: "Primer token: el pedacito de texto que devuelve el modelo.",
+        carries: { before: "", value: '"¡Hola"', after: "", form: "token" },
+        caption: "El modelo devuelve un string: el primer token.",
         phase: "in",
         state: T1,
     },
@@ -182,8 +212,13 @@ export const STEPS: Step[] = [
         snippet: "hookToken",
         focus: [1, 7],
         chipLine: 7,
-        carries: { before: "", value: "¡Hola", after: "", form: "token" },
-        caption: "onToken lo manda de vuelta al hook y se pega al ultimo mensaje.",
+        carries: {
+            before: CONTENT_OPEN,
+            value: '"¡Hola"',
+            after: CONTENT_CLOSE,
+            form: "token",
+        },
+        caption: "onToken lo pega al content del ultimo mensaje. Ese content era \"\".",
         phase: "in",
         state: T1,
     },
@@ -191,26 +226,36 @@ export const STEPS: Step[] = [
         snippet: "clientFrames",
         focus: [9, 11, 13, 15],
         chipLine: 13,
-        carries: { before: "", value: "! ¿En qué", after: "", form: "token" },
-        caption: "El loop arranca de nuevo: el modelo sigue mandando tokens.",
+        carries: { before: "", value: '"! ¿En qué"', after: "", form: "token" },
+        caption: "El loop arranca de nuevo: otro evento, otro string.",
         phase: "in",
-        state: T2,
+        state: T1,
     },
     {
-        snippet: "clientFrames",
-        focus: [9, 11, 13, 15],
-        chipLine: 13,
-        carries: { before: "", value: " te ayudo", after: "", form: "token" },
-        caption: "Otro token mas. Y asi hasta que llega [DONE].",
+        snippet: "hookToken",
+        focus: [1, 7],
+        chipLine: 7,
+        carries: {
+            before: CONTENT_OPEN,
+            value: '"¡Hola! ¿En qué"',
+            after: CONTENT_CLOSE,
+            form: "token",
+        },
+        caption: "Y se vuelve a pegar. El content del asistente va creciendo.",
         phase: "in",
-        state: T3,
+        state: T2,
     },
     {
         snippet: "appRender",
         focus: [4],
         chipLine: 4,
-        carries: { before: "", value: ASSISTANT_REPLY, after: "", form: "reply" },
-        caption: "La respuesta completa, armada token por token.",
+        carries: {
+            before: "",
+            value: '"¡Hola! ¿En qué te ayudo?"',
+            after: "",
+            form: "reply",
+        },
+        caption: "Al final el content completo. La respuesta entera, token por token.",
         phase: "in",
         state: T4,
     },

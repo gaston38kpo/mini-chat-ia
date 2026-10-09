@@ -41,16 +41,30 @@ const CLAMP = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
 const SNIPPET_KEYS = Object.keys(SNIPPETS) as SnippetKey[];
 
-/** Rango de frames en que cada snippet esta en pantalla. */
-const SNIPPET_RANGES = STEPS.reduce<Record<string, [number, number]>>((acc, step, index) => {
-    const start = stepFrom(index);
-    const end = start + STEP_FRAMES;
-    const current = acc[step.snippet];
-    acc[step.snippet] = current
-        ? [Math.min(current[0], start), Math.max(current[1], end)]
-        : [start, end];
-    return acc;
-}, {});
+/**
+ * Los tramos de frames en que cada snippet esta en pantalla. Un snippet puede
+ * aparecer en VARIOS tramos (el loop vuelve a clientFrames), asi que guardamos
+ * una lista y no un solo rango: si no, quedaria visible en el hueco del medio y
+ * se superpondria con el snippet que corresponde a ese momento.
+ */
+const SNIPPET_RANGES = STEPS.reduce<Record<string, [number, number][]>>(
+    (acc, step, index) => {
+        const start = stepFrom(index);
+        const end = start + STEP_FRAMES;
+        const ranges = acc[step.snippet] ?? [];
+        const last = ranges[ranges.length - 1];
+
+        if (last && last[1] === start) {
+            last[1] = end;
+        } else {
+            ranges.push([start, end]);
+        }
+
+        acc[step.snippet] = ranges;
+        return acc;
+    },
+    {}
+);
 
 /** Centro vertical de una linea del bloque de codigo, en px. */
 function lineCenter(line: number): number {
@@ -138,13 +152,20 @@ export function MainVideo() {
     const doorPulse = interpolate(frame, [landFrame, landFrame + 18], [1, 0], CLAMP);
 
     const snippetOpacity = (key: SnippetKey): number => {
-        const [start, end] = SNIPPET_RANGES[key];
-        return interpolate(
-            frame,
-            [start - SNIPPET_FADE, start, end - SNIPPET_FADE, end],
-            [0, 1, 1, 0],
-            CLAMP
-        );
+        const ranges = SNIPPET_RANGES[key] ?? [];
+        let visible = 0;
+
+        for (const [start, end] of ranges) {
+            const opacity = interpolate(
+                frame,
+                [start - SNIPPET_FADE, start, end - SNIPPET_FADE, end],
+                [0, 1, 1, 0],
+                CLAMP
+            );
+            visible = Math.max(visible, opacity);
+        }
+
+        return visible;
     };
 
     // En el ultimo paso la respuesta termina de escribirse sola.
