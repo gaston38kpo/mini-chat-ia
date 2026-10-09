@@ -1,15 +1,25 @@
 import { CHIP_FONT_SIZE, COLORS, MONO_FAMILY } from "../theme";
 
 type ValueCharacterProps = {
-    /** El valor que lleva el personaje en este momento. */
+    /** Lo que va antes del hueco. Es el contenedor que se abre. */
+    before: string;
+    /** Lo que ocupa el hueco. Es lo que viaja. */
     value: string;
-    /** Radio del borde: es lo que hace que "cambie de forma". */
+    /** Lo que va despues del hueco. Es el contenedor que se cierra. */
+    after: string;
+    /** Radio del borde: es lo que hace que el personaje "cambie de forma". */
     radius: number;
     dashed: boolean;
     filled: boolean;
     accent: string;
-    /** Escala del "pop" al aterrizar. */
+    /** Escala del "pop". */
     scale: number;
+    /** 0..1: cuanto se ve el contenedor. Sube ANTES de que entre el valor. */
+    containerOpacity: number;
+    /** 0..1: cuanto se ve el valor que ocupa el hueco. */
+    payloadOpacity: number;
+    /** Cuanto le falta al valor para llegar al hueco, en px. */
+    payloadShift: number;
 };
 
 function Eyes({ color }: { color: string }) {
@@ -22,45 +32,79 @@ function Eyes({ color }: { color: string }) {
 }
 
 /**
- * El personaje: lleva el valor y va cambiando de forma segun en que parte del
- * codigo este. Los dos puntitos son la carita, para que se lea como alguien que
- * viaja por el codigo y no como una etiqueta.
+ * El personaje: lleva el valor y va cambiando de forma. El contenedor (`before`
+ * y `after`) se muestra vacio ANTES de que el valor entre al hueco, para que la
+ * transformacion se vea como un proceso y no como un salto magico.
  */
 export function ValueCharacter({
+    before,
     value,
+    after,
     radius,
     dashed,
     filled,
     accent,
     scale,
+    containerOpacity,
+    payloadOpacity,
+    payloadShift,
 }: ValueCharacterProps) {
     const ink = filled ? "#ffffff" : COLORS.text;
 
+    const containerStyle = {
+        opacity: containerOpacity,
+        fontFamily: MONO_FAMILY,
+        fontSize: CHIP_FONT_SIZE,
+        color: accent,
+        whiteSpace: "pre" as const,
+    };
+
     return (
-        <div style={{ transform: `scale(${scale})`, transformOrigin: "center" }}>
+        <div
+            style={{
+                display: "flex",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 6,
+                maxWidth: 380,
+                justifyContent: "flex-end",
+            }}
+        >
+            {before !== "" ? <span style={containerStyle}>{before}</span> : null}
+
             <div
                 style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    maxWidth: 268,
-                    padding: "7px 13px",
-                    borderRadius: radius,
-                    border: `2px ${dashed ? "dashed" : "solid"} ${accent}`,
-                    backgroundColor: filled ? accent : COLORS.panelAlt,
-                    fontFamily: MONO_FAMILY,
-                    fontSize: CHIP_FONT_SIZE,
-                    color: ink,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    boxShadow: `0 0 26px ${accent}66`,
+                    opacity: payloadOpacity,
+                    transform: `translateX(${payloadShift}px) scale(${scale})`,
+                    transformOrigin: "center",
                 }}
             >
-                <Eyes color={filled ? "#ffffff" : accent} />
-                <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {value}
-                </span>
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        maxWidth: 340,
+                        padding: "7px 13px",
+                        borderRadius: radius,
+                        border: `2px ${dashed ? "dashed" : "solid"} ${accent}`,
+                        backgroundColor: filled ? accent : COLORS.panelAlt,
+                        fontFamily: MONO_FAMILY,
+                        fontSize: CHIP_FONT_SIZE,
+                        color: ink,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        boxShadow: `0 0 26px ${accent}66`,
+                    }}
+                >
+                    <Eyes color={filled ? "#ffffff" : accent} />
+                    <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {value}
+                    </span>
+                </div>
             </div>
+
+            {after !== "" ? <span style={containerStyle}>{after}</span> : null}
         </div>
     );
 }

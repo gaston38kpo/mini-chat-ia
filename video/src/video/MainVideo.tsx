@@ -19,15 +19,25 @@ import {
 } from "./steps";
 
 /** Espacio a la derecha del codigo, reservado para el personaje. */
-const CHIP_GUTTER = 288;
+const CHIP_GUTTER = 420;
 /** Padding vertical del bloque de codigo; el personaje se alinea con esto. */
 const CODE_PADDING = 24;
 /** Frames que dura el salto hasta la proxima linea. */
 const HOP_FRAMES = 20;
-/** Frames que tarda en cambiar de forma al aterrizar. */
-const MORPH_FRAMES = 14;
 /** Frames de cross-fade al cambiar de snippet. */
 const SNIPPET_FADE = 12;
+
+/**
+ * La transicion del valor, en tres tiempos medidos desde que el personaje
+ * aterriza: se va el valor viejo -> aparece el contenedor vacio -> entra el
+ * valor nuevo. Nada de cambios instantaneos.
+ */
+const EXIT_END = 7;
+const CONTAINER_END = 17;
+const ENTER_END = 31;
+const MORPH_FRAMES = 12;
+
+const CLAMP = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
 const SNIPPET_KEYS = Object.keys(SNIPPETS) as SnippetKey[];
 
@@ -48,9 +58,9 @@ function lineCenter(line: number): number {
 }
 
 /**
- * El recorrido de un mensaje, en una sola toma: un personaje lleva el valor
- * real por las lineas del codigo, salta de una a otra, y cambia de forma cada
- * vez que cruza una puerta.
+ * El recorrido de un mensaje, en una sola toma. El personaje lleva el valor por
+ * las lineas del codigo y, cada vez que cruza una puerta, se ve el proceso:
+ * primero el contenedor vacio, despues el valor entrando.
  */
 export function MainVideo() {
     const frame = useCurrentFrame();
@@ -60,24 +70,49 @@ export function MainVideo() {
     const step = STEPS[stepIndex];
     const from = stepFrom(stepIndex);
     const landFrame = from + HOP_FRAMES;
+    const rel = frame - landFrame;
     const prev = STEPS[stepIndex - 1];
 
-    // Solo salta si seguimos dentro del mismo snippet. Si cambia el codigo, el
-    // personaje aparece directo en la linea nueva.
+    // Solo animamos la transicion si seguimos dentro del mismo snippet.
     const hops = prev !== undefined && prev.snippet === step.snippet;
-    const arrived = !hops || frame >= landFrame;
+    const animate = hops;
 
-    // Mientras viaja sigue llevando el valor viejo; al aterrizar, se transforma.
-    const carriedValue = arrived ? step.carries.value : (prev?.carries.value ?? step.carries.value);
+    // El contenedor cambia apenas se fue el valor viejo; el valor, un rato
+    // despues, cuando el contenedor ya esta a la vista.
+    const containerCarried = animate && prev && rel < EXIT_END ? prev.carries : step.carries;
+    const valueCarried = animate && prev && rel < CONTAINER_END ? prev.carries : step.carries;
 
-    const fromForm = FORMS[prev?.carries.form ?? step.carries.form];
+    let containerOpacity: number;
+    let payloadOpacity: number;
+    let enterProgress: number;
+
+    if (!animate) {
+        containerOpacity = 1;
+        payloadOpacity = 1;
+        enterProgress = 1;
+    } else if (rel < EXIT_END) {
+        // Tiempo 1: se va el valor viejo, con su contenedor.
+        containerOpacity = interpolate(rel, [0, EXIT_END], [1, 0], CLAMP);
+        payloadOpacity = interpolate(rel, [0, EXIT_END], [1, 0], CLAMP);
+        enterProgress = 0;
+    } else if (rel < CONTAINER_END) {
+        // Tiempo 2: aparece el contenedor, todavia vacio.
+        containerOpacity = interpolate(rel, [EXIT_END, CONTAINER_END], [0, 1], CLAMP);
+        payloadOpacity = 0;
+        enterProgress = 0;
+    } else {
+        // Tiempo 3: el valor entra al hueco.
+        containerOpacity = 1;
+        payloadOpacity = interpolate(rel, [CONTAINER_END, ENTER_END], [0, 1], CLAMP);
+        enterProgress = interpolate(rel, [CONTAINER_END, ENTER_END], [0, 1], CLAMP);
+    }
+
+    // Forma: se interpola al entrar, para que el cambio de forma se vea suave.
+    const fromForm = FORMS[valueCarried.form];
     const toForm = FORMS[step.carries.form];
-    const morph = arrived
-        ? interpolate(frame, [landFrame, landFrame + MORPH_FRAMES], [0, 1], {
-              extrapolateLeft: "clamp",
-              extrapolateRight: "clamp",
-          })
-        : 0;
+    const morph = animate
+        ? interpolate(rel, [CONTAINER_END, CONTAINER_END + MORPH_FRAMES], [0, 1], CLAMP)
+        : 1;
 
     const radius = interpolate(morph, [0, 1], [fromForm.radius, toForm.radius]);
     const accent = morph > 0.5 ? toForm.accent : fromForm.accent;
@@ -91,16 +126,16 @@ export function MainVideo() {
     const charY = hops ? interpolate(hop, [0, 1], [prevY, targetY]) : targetY;
     const arcX = hops ? -Math.sin(Math.min(Math.max(hop, 0), 1) * Math.PI) * 46 : 0;
 
-    // Pop al aterrizar + un vaiven chiquito para que se lea como un personaje.
-    const pop = arrived && hops ? spring({ frame: frame - landFrame, fps, config: { damping: 9, stiffness: 200 } }) : 0;
-    const scale = 1 + Math.min(pop, 1.4) * 0.16;
+    // Pop al entrar + vaiven chiquito, para que se lea como un personaje.
+    const pop =
+        animate && rel >= CONTAINER_END
+            ? spring({ frame: rel - CONTAINER_END, fps, config: { damping: 9, stiffness: 200 } })
+            : 0;
+    const scale = 1 + Math.min(Math.max(pop, 0), 1.4) * 0.16;
     const bob = Math.sin(frame / 13) * 2.5;
 
     // La puerta se ilumina cuando el personaje la cruza.
-    const doorPulse = interpolate(frame, [landFrame, landFrame + 18], [1, 0], {
-        extrapolateLeft: "clamp",
-        extrapolateRight: "clamp",
-    });
+    const doorPulse = interpolate(frame, [landFrame, landFrame + 18], [1, 0], CLAMP);
 
     const snippetOpacity = (key: SnippetKey): number => {
         const [start, end] = SNIPPET_RANGES[key];
@@ -108,16 +143,13 @@ export function MainVideo() {
             frame,
             [start - SNIPPET_FADE, start, end - SNIPPET_FADE, end],
             [0, 1, 1, 0],
-            { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+            CLAMP
         );
     };
 
     // En el ultimo paso la respuesta termina de escribirse sola.
     const isLastStep = stepIndex === STEPS.length - 1;
-    const reveal = interpolate(frame, [from, from + STEP_FRAMES - 20], [0, 1], {
-        extrapolateLeft: "clamp",
-        extrapolateRight: "clamp",
-    });
+    const reveal = interpolate(frame, [from, from + STEP_FRAMES - 20], [0, 1], CLAMP);
     const assistantText = isLastStep
         ? ASSISTANT_REPLY.slice(0, Math.round(reveal * ASSISTANT_REPLY.length))
         : step.state.assistant;
@@ -127,13 +159,13 @@ export function MainVideo() {
         frame,
         [0, 12, INTRO_FRAMES - 14, INTRO_FRAMES],
         [0, 1, 1, 0],
-        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+        CLAMP
     );
     const outroOpacity = interpolate(
         frame,
         [outroStart, outroStart + 14, MAIN_VIDEO_DURATION - 12, MAIN_VIDEO_DURATION],
         [0, 1, 1, 0],
-        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+        CLAMP
     );
 
     return (
@@ -192,17 +224,22 @@ export function MainVideo() {
                         }}
                     >
                         <ValueCharacter
-                            value={carriedValue}
+                            before={containerCarried.before}
+                            value={valueCarried.value}
+                            after={containerCarried.after}
                             radius={radius}
                             dashed={dashed}
                             filled={filled}
                             accent={accent}
                             scale={scale}
+                            containerOpacity={containerOpacity}
+                            payloadOpacity={payloadOpacity}
+                            payloadShift={(1 - enterProgress) * -34}
                         />
                     </div>
                 </div>
 
-                <div style={{ width: 320, flexShrink: 0 }}>
+                <div style={{ width: 280, flexShrink: 0 }}>
                     <StatePanel user={step.state.user} assistant={assistantText} />
                 </div>
             </div>

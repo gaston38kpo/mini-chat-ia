@@ -33,8 +33,8 @@ export const WIDTH = 1920;
 export const HEIGHT = 1080;
 
 /** Metricas del bloque de codigo. La altura de linea sale de aca. */
-export const CODE_FONT_SIZE = 20;
+export const CODE_FONT_SIZE = 19;
 export const CODE_LINE_HEIGHT = 1.55;
 export const CODE_LINE_PX = CODE_FONT_SIZE * CODE_LINE_HEIGHT;
 
-export const CHIP_FONT_SIZE = 15;
+export const CHIP_FONT_SIZE = 14;
