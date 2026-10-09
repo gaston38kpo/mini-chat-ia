@@ -24,11 +24,13 @@ type CodeBlockProps = {
     lang?: "ts" | "tsx" | "json";
     /** Lineas (1-based) que van en foco en este frame. Vacio = todo apagado. */
     focus?: number[];
+    /** 0..1: cuanto brilla la linea en foco. Sube cuando el personaje aterriza. */
+    focusPulse?: number;
     /** Opacidad de las lineas que NO estan en foco. */
     dimOpacity?: number;
     fontSize?: number;
     lineHeight?: number;
-    /** Espacio a la derecha para que el chip flotante no tape el codigo. */
+    /** Espacio a la derecha para que el personaje no tape el codigo. */
     reserveRight?: number;
 };
 
@@ -36,6 +38,7 @@ export function CodeBlock({
     code,
     lang = "ts",
     focus = [],
+    focusPulse = 0,
     dimOpacity = 0.3,
     fontSize = CODE_FONT_SIZE,
     lineHeight = CODE_LINE_HEIGHT,
@@ -63,6 +66,7 @@ export function CodeBlock({
     }
 
     const focusSet = new Set(focus);
+    const barAlpha = 0.14 + focusPulse * 0.26;
 
     return (
         <div
@@ -84,7 +88,9 @@ export function CodeBlock({
                             display: "flex",
                             gap: 18,
                             opacity: isFocused ? 1 : dimOpacity,
-                            backgroundColor: isFocused ? COLORS.focusBar : "transparent",
+                            backgroundColor: isFocused
+                                ? `rgba(249, 115, 22, ${barAlpha})`
+                                : "transparent",
                             borderLeft: `3px solid ${isFocused ? COLORS.orange : "transparent"}`,
                             paddingLeft: 14,
                             paddingRight: 18,

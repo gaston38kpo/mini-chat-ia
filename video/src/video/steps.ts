@@ -1,3 +1,4 @@
+import { COLORS } from "../theme";
 import {
     SNIPPET_APP_RENDER,
     SNIPPET_APP_SUBMIT,
@@ -28,6 +29,38 @@ export const SNIPPETS: Record<SnippetKey, { file: string; code: string }> = {
     appRender: { file: "App.tsx", code: SNIPPET_APP_RENDER },
 };
 
+/**
+ * Las formas que va tomando el personaje. `radius` es lo que se interpola
+ * cuando cambia de forma: circulo -> caja -> cuadradito -> burbuja.
+ */
+export type FormKey =
+    | "string"
+    | "array"
+    | "ui"
+    | "request"
+    | "bytes"
+    | "event"
+    | "token"
+    | "reply";
+
+export type FormSpec = {
+    radius: number;
+    dashed: boolean;
+    filled: boolean;
+    accent: string;
+};
+
+export const FORMS: Record<FormKey, FormSpec> = {
+    string: { radius: 999, dashed: false, filled: false, accent: COLORS.outbound },
+    array: { radius: 14, dashed: false, filled: false, accent: COLORS.outbound },
+    ui: { radius: 14, dashed: false, filled: false, accent: COLORS.outbound },
+    request: { radius: 8, dashed: false, filled: false, accent: COLORS.outbound },
+    bytes: { radius: 999, dashed: true, filled: false, accent: COLORS.inbound },
+    event: { radius: 12, dashed: false, filled: false, accent: COLORS.inbound },
+    token: { radius: 6, dashed: false, filled: true, accent: COLORS.inbound },
+    reply: { radius: 999, dashed: false, filled: true, accent: COLORS.inbound },
+};
+
 export const USER_MESSAGE = "Hola";
 export const ASSISTANT_REPLY = "¡Hola! ¿En qué te ayudo?";
 
@@ -35,12 +68,12 @@ export type ChatState = { user: string | null; assistant: string };
 
 export type Step = {
     snippet: SnippetKey;
-    /** Lineas (1-based) que se encienden en este paso. */
+    /** Lineas (1-based) que se encienden: la "puerta" que el personaje cruza. */
     focus: number[];
-    /** Linea junto a la que flota el chip de valor. */
+    /** Linea en la que se para el personaje. */
     chipLine: number;
-    /** Que vale la variable en este paso. */
-    chipValue: string;
+    /** Lo que lleva el personaje: el valor real, no el nombre de la variable. */
+    carries: { value: string; form: FormKey };
     caption: string;
     phase: "out" | "in";
     state: ChatState;
@@ -48,17 +81,22 @@ export type Step = {
 
 const EMPTY: ChatState = { user: null, assistant: "" };
 const SENT: ChatState = { user: USER_MESSAGE, assistant: "" };
-const FIRST: ChatState = { user: USER_MESSAGE, assistant: "¡Hola" };
-const DONE: ChatState = { user: USER_MESSAGE, assistant: ASSISTANT_REPLY };
+const T1: ChatState = { user: USER_MESSAGE, assistant: "¡Hola" };
+const T2: ChatState = { user: USER_MESSAGE, assistant: "¡Hola! ¿En qué" };
+const T3: ChatState = { user: USER_MESSAGE, assistant: "¡Hola! ¿En qué te ayudo" };
+const T4: ChatState = { user: USER_MESSAGE, assistant: ASSISTANT_REPLY };
 
-/** El guion del recorrido: sale el mensaje, vuelve la respuesta. */
+/**
+ * El guion del recorrido. Primero el string viaja hasta el modelo cambiando de
+ * forma en cada puerta; despues vuelven los tokens, uno por vuelta del loop.
+ */
 export const STEPS: Step[] = [
     {
         snippet: "appSubmit",
         focus: [7],
         chipLine: 7,
-        chipValue: '"Hola"',
-        caption: "Escribis y el formulario llama a send(input).",
+        carries: { value: "Hola", form: "string" },
+        caption: "Escribis \"Hola\" y el formulario lo manda a send(input).",
         phase: "out",
         state: EMPTY,
     },
@@ -66,8 +104,8 @@ export const STEPS: Step[] = [
         snippet: "hookSend",
         focus: [6, 8],
         chipLine: 6,
-        chipValue: '"Hola"',
-        caption: "El hook limpia el texto y chequea que no este vacio.",
+        carries: { value: "Hola", form: "string" },
+        caption: "El string entra al hook: se limpia y se chequea que no este vacio.",
         phase: "out",
         state: EMPTY,
     },
@@ -75,8 +113,8 @@ export const STEPS: Step[] = [
         snippet: "hookSend",
         focus: [10],
         chipLine: 10,
-        chipValue: "history",
-        caption: "Arma el historial completo: la API no guarda estado.",
+        carries: { value: '[ user: "Hola" ]', form: "array" },
+        caption: "Ahora es parte de una lista: el historial que recibe el modelo.",
         phase: "out",
         state: EMPTY,
     },
@@ -84,8 +122,8 @@ export const STEPS: Step[] = [
         snippet: "hookSend",
         focus: [12],
         chipLine: 12,
-        chipValue: 'content: ""',
-        caption: "Muestra tu mensaje y una burbuja vacia del asistente.",
+        carries: { value: "burbuja vacia", form: "ui" },
+        caption: "Y aparece en pantalla al instante, con una burbuja vacia esperando.",
         phase: "out",
         state: SENT,
     },
@@ -93,8 +131,8 @@ export const STEPS: Step[] = [
         snippet: "clientFetch",
         focus: [5, 8, 10, 11],
         chipLine: 10,
-        chipValue: "messages",
-        caption: "Le manda el historial con stream: true.",
+        carries: { value: "{ messages, stream }", form: "request" },
+        caption: "Se convierte en el cuerpo del request y viaja a LM Studio.",
         phase: "out",
         state: SENT,
     },
@@ -102,8 +140,8 @@ export const STEPS: Step[] = [
         snippet: "clientReader",
         focus: [1, 2, 3, 6, 9],
         chipLine: 9,
-        chipValue: "bytes",
-        caption: "Vuelven bytes. Los decodifica y los acumula en el buffer.",
+        carries: { value: "bytes…", form: "bytes" },
+        caption: "Del otro lado no vuelve texto: vuelven bytes.",
         phase: "in",
         state: SENT,
     },
@@ -111,8 +149,8 @@ export const STEPS: Step[] = [
         snippet: "clientFrames",
         focus: [1, 2, 4, 5],
         chipLine: 5,
-        chipValue: "data:",
-        caption: "Parte por evento SSE y busca la linea data:.",
+        carries: { value: "data: {…}", form: "event" },
+        caption: "Se decodifican y se parten por evento SSE. Aparece la linea data:.",
         phase: "in",
         state: SENT,
     },
@@ -120,28 +158,46 @@ export const STEPS: Step[] = [
         snippet: "clientFrames",
         focus: [9, 11, 13, 15],
         chipLine: 13,
-        chipValue: '"¡Hola"',
-        caption: "Saca el pedacito de texto y lo emite con onToken.",
+        carries: { value: "¡Hola", form: "token" },
+        caption: "Primer token: el pedacito de texto que devuelve el modelo.",
         phase: "in",
-        state: FIRST,
+        state: T1,
     },
     {
         snippet: "hookToken",
         focus: [1, 7],
         chipLine: 7,
-        chipValue: "content + token",
-        caption: "El callback le pega el token al ultimo mensaje.",
+        carries: { value: "¡Hola", form: "token" },
+        caption: "onToken lo manda de vuelta al hook y se pega al ultimo mensaje.",
         phase: "in",
-        state: FIRST,
+        state: T1,
+    },
+    {
+        snippet: "clientFrames",
+        focus: [9, 11, 13, 15],
+        chipLine: 13,
+        carries: { value: "! ¿En qué", form: "token" },
+        caption: "El loop arranca de nuevo: el modelo sigue mandando tokens.",
+        phase: "in",
+        state: T2,
+    },
+    {
+        snippet: "clientFrames",
+        focus: [9, 11, 13, 15],
+        chipLine: 13,
+        carries: { value: " te ayudo", form: "token" },
+        caption: "Otro token mas. Y asi hasta que llega [DONE].",
+        phase: "in",
+        state: T3,
     },
     {
         snippet: "appRender",
         focus: [4],
         chipLine: 4,
-        chipValue: "content",
-        caption: "Y la burbuja se llena sola, token por token.",
+        carries: { value: ASSISTANT_REPLY, form: "reply" },
+        caption: "La respuesta completa, armada token por token.",
         phase: "in",
-        state: DONE,
+        state: T4,
     },
 ];
 
@@ -149,7 +205,7 @@ export const INTRO_FRAMES = 90;
 export const STEP_FRAMES = 84;
 export const OUTRO_FRAMES = 90;
 
-/** 90 + (10 x 84) + 90 = 1020 frames = 34 s a 30 fps. */
+/** 90 + (12 x 84) + 90 = 1188 frames = 39,6 s a 30 fps. */
 export const MAIN_VIDEO_DURATION =
     INTRO_FRAMES + STEPS.length * STEP_FRAMES + OUTRO_FRAMES;
 
