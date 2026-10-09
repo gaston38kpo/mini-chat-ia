@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { cancelRender, continueRender, delayRender } from "remotion";
 import { createHighlighter, type Highlighter, type ThemedToken } from "shiki";
-import { COLORS, MONO_FAMILY } from "../theme";
+import { CODE_FONT_SIZE, CODE_LINE_HEIGHT, COLORS, MONO_FAMILY } from "../theme";
 
 const THEME_NAME = "github-dark";
 
@@ -27,6 +27,9 @@ type CodeBlockProps = {
     /** Opacidad de las lineas que NO estan en foco. */
     dimOpacity?: number;
     fontSize?: number;
+    lineHeight?: number;
+    /** Espacio a la derecha para que el chip flotante no tape el codigo. */
+    reserveRight?: number;
 };
 
 export function CodeBlock({
@@ -34,7 +37,9 @@ export function CodeBlock({
     lang = "ts",
     focus = [],
     dimOpacity = 0.3,
-    fontSize = 26,
+    fontSize = CODE_FONT_SIZE,
+    lineHeight = CODE_LINE_HEIGHT,
+    reserveRight = 0,
 }: CodeBlockProps) {
     // delayRender le dice a Remotion "todavia no renderices este frame".
     // Va en useState y no en useEffect para que se pida UNA sola vez.
@@ -44,10 +49,7 @@ export function CodeBlock({
     useEffect(() => {
         getHighlighter()
             .then((highlighter) => {
-                const result = highlighter.codeToTokens(code, {
-                    lang,
-                    theme: THEME_NAME,
-                });
+                const result = highlighter.codeToTokens(code, { lang, theme: THEME_NAME });
                 setLines(result.tokens);
                 continueRender(handle);
             })
@@ -63,7 +65,14 @@ export function CodeBlock({
     const focusSet = new Set(focus);
 
     return (
-        <div style={{ fontFamily: MONO_FAMILY, fontSize, lineHeight: 1.55 }}>
+        <div
+            style={{
+                paddingRight: reserveRight,
+                fontFamily: MONO_FAMILY,
+                fontSize,
+                lineHeight,
+            }}
+        >
             {lines.map((line, index) => {
                 const lineNumber = index + 1;
                 const isFocused = focusSet.has(lineNumber);
@@ -83,7 +92,7 @@ export function CodeBlock({
                     >
                         <span
                             style={{
-                                width: 38,
+                                width: 34,
                                 flexShrink: 0,
                                 textAlign: "right",
                                 color: COLORS.muted,

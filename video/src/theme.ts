@@ -1,11 +1,12 @@
 /**
  * Tokens de diseno del video: un solo lugar para colores, tipografias y
- * duraciones, asi las escenas no repiten valores magicos.
+ * medidas, asi las escenas no repiten valores magicos.
  */
 
 export const COLORS = {
     background: "#0b0b0d",
     panel: "#15151a",
+    panelAlt: "#1b1b22",
     text: "#e8e8ee",
     muted: "#8b8b96",
     border: "#26262e",
@@ -14,6 +15,10 @@ export const COLORS = {
     crimsonSoft: "#fb7185",
     codeBg: "#101015",
     focusBar: "rgba(249, 115, 22, 0.14)",
+    chipBg: "#1f2937",
+    chipBorder: "#3b82f6",
+    outbound: "#f97316",
+    inbound: "#3b82f6",
 } as const;
 
 /** Solo fuentes del sistema: nada de red, asi el render es determinista. */
@@ -27,17 +32,9 @@ export const FPS = 30;
 export const WIDTH = 1920;
 export const HEIGHT = 1080;
 
-/** Duracion de cada escena, en frames (30 fps). */
-export const DURATIONS = {
-    s01: 150,
-    s02: 180,
-    s03: 240,
-    s04: 360,
-    s05: 150,
-} as const;
+/** Metricas del bloque de codigo. La altura de linea sale de aca. */
+export const CODE_FONT_SIZE = 21;
+export const CODE_LINE_HEIGHT = 1.55;
+export const CODE_LINE_PX = CODE_FONT_SIZE * CODE_LINE_HEIGHT;
 
-/**
- * Cada transicion "se come" estos frames. Por eso el total del video NO es la
- * suma de las escenas: es la suma menos (transiciones x cantidad).
- */
-export const TRANSITION_DURATION = 15;
+export const CHIP_FONT_SIZE = 16;
